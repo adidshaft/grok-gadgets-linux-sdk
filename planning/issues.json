@@ -1,0 +1,87 @@
+[
+  {
+    "id": "LIN-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Independent contribution foundation",
+    "acceptance": [
+      "License and developer instructions"
+    ],
+    "dependencies": [],
+    "labels": [
+      "maintenance",
+      "linux",
+      "P1"
+    ],
+    "milestone": "M0",
+    "stage": "done",
+    "commits": [],
+    "evidence": "Foundation review"
+  },
+  {
+    "id": "LIN-002",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Reusable capability registry and pinned contracts",
+    "acceptance": [
+      "Custom handlers/state/events without gateway edits",
+      "Strict validation and boot-local dedup"
+    ],
+    "dependencies": [
+      "gateway protocol 0.1.0"
+    ],
+    "labels": [
+      "feature",
+      "linux",
+      "protocol",
+      "P1"
+    ],
+    "milestone": "M3",
+    "stage": "in progress",
+    "commits": [],
+    "evidence": "Pending"
+  },
+  {
+    "id": "LIN-003",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Agent and real gateway transport integration",
+    "acceptance": [
+      "Authenticated loopback registration/poll/ack/events",
+      "Capped reconnect and safe retry"
+    ],
+    "dependencies": [
+      "LIN-002",
+      "gateway TCP service"
+    ],
+    "labels": [
+      "feature",
+      "linux",
+      "P1"
+    ],
+    "milestone": "M3",
+    "stage": "ready",
+    "commits": [],
+    "evidence": "Pending"
+  },
+  {
+    "id": "LIN-004",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Linux runtime and physical peripheral evidence",
+    "acceptance": [
+      "Example run on real Linux",
+      "Observed peripheral behavior"
+    ],
+    "dependencies": [
+      "Linux runtime",
+      "selected authorized peripheral"
+    ],
+    "labels": [
+      "linux",
+      "help wanted",
+      "needs hardware",
+      "P1"
+    ],
+    "milestone": "M8",
+    "stage": "blocked",
+    "commits": [],
+    "evidence": "Docker daemon unavailable; qemu/limactl/podman absent; macOS tests are not Linux verification"
+  }
+]
