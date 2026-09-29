@@ -14,7 +14,9 @@
     ],
     "milestone": "M0",
     "stage": "done",
-    "commits": [],
+    "commits": [
+      "ec228ec"
+    ],
     "evidence": "Foundation review"
   },
   {
@@ -35,9 +37,9 @@
       "P1"
     ],
     "milestone": "M3",
-    "stage": "in progress",
+    "stage": "done",
     "commits": [],
-    "evidence": "Pending"
+    "evidence": "8 macOS unit tests plus pinned SHA256 contract loading; actual Linux pending"
   },
   {
     "id": "LIN-003",
