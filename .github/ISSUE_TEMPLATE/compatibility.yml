@@ -1,13 +1,13 @@
 name: Compatibility report
-description: Report a reproducible MCP compatibility issue without private home data
+description: Report a reproducible SDK compatibility issue without private home data
 title: "[compatibility] "
-labels: [bug, home-assistant]
+labels: [bug, linux]
 body:
   - type: textarea
     id: environment
     attributes:
       label: Versions and evidence level
-      description: HA/client versions, transport, fixture or real installation; omit tokens and household names.
+      description: SDK/gateway versions, OS/kernel, transport, simulation or real peripheral; omit tokens and household names.
     validations:
       required: true
   - type: textarea

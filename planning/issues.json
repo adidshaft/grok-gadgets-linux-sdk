@@ -62,7 +62,9 @@
     ],
     "milestone": "M3",
     "stage": "done",
-    "commits": [],
+    "commits": [
+      "4df75b2"
+    ],
     "evidence": "15 tests on macOS and Linux-aarch64 Docker incl installed CLI + real gateway4cf42ff TCP; pinned Python digest and exact runtime in docs/verification.md"
   },
   {
