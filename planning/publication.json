@@ -1,0 +1,7 @@
+{
+  "status": "prepared; inactive",
+  "owner": null,
+  "required_check": "linux-sdk-checks",
+  "main": {"pull_requests_required": true, "required_approving_reviews": 0, "resolve_conversations": true, "allow_force_push": false, "allow_deletion": false},
+  "before_publication": ["Select actual owner/maintainers", "Configure private security reporting", "Validate public policy links", "Migrate ledger and labels", "Pin actions to reviewed immutable commits", "Authorize creation/push separately"]
+}

@@ -77,6 +77,8 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         )
         data = json.loads(fixture.read_text())
         self.assertTrue(data)
+        for request in data:
+            self.assertTrue(REQUEST_VALIDATOR.is_valid(request))
 
     def test_event_queue_does_not_drop_silently(self):
         device = self.device(event_limit=2).event_capability("button")

@@ -38,7 +38,9 @@
     ],
     "milestone": "M3",
     "stage": "done",
-    "commits": [],
+    "commits": [
+      "937e1c3"
+    ],
     "evidence": "8 macOS unit tests plus pinned SHA256 contract loading; actual Linux pending"
   },
   {
@@ -59,9 +61,9 @@
       "P1"
     ],
     "milestone": "M3",
-    "stage": "ready",
+    "stage": "done",
     "commits": [],
-    "evidence": "Pending"
+    "evidence": "15 tests on macOS and Linux-aarch64 Docker incl installed CLI + real gateway4cf42ff TCP; pinned Python digest and exact runtime in docs/verification.md"
   },
   {
     "id": "LIN-004",
@@ -72,8 +74,9 @@
       "Observed peripheral behavior"
     ],
     "dependencies": [
-      "Linux runtime",
-      "selected authorized peripheral"
+      "selected authorized peripheral",
+      "Linux service lifecycle",
+      "independent tester"
     ],
     "labels": [
       "linux",
@@ -84,6 +87,6 @@
     "milestone": "M8",
     "stage": "blocked",
     "commits": [],
-    "evidence": "Docker daemon unavailable; qemu/limactl/podman absent; macOS tests are not Linux verification"
+    "evidence": "Linux aarch64 Docker kernel6.10.14-linuxkit CPython3.11.17 wheel acceptance passed; physical peripherals and systemd remain pending"
   }
 ]

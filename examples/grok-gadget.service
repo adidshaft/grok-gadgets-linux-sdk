@@ -1,0 +1,14 @@
+[Unit]
+Description=Grok Gadgets user device agent
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/grok-gadgets/linux-agent.env
+ExecStart=%h/grok-gadget/.venv/bin/grok-linux-agent --factory my_gadget:create
+WorkingDirectory=%h/grok-gadget
+Restart=no
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

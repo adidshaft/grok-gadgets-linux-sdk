@@ -1,0 +1,18 @@
+{
+  "status": "unpublished local build",
+  "version": "0.1.0a1",
+  "artifacts": [
+    {
+      "file": ".gitignore",
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1"
+    },
+    {
+      "file": "grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl",
+      "sha256": "4af42745500ae5cfc6760582da5b96d39b764238b7dd5bbff63c6711f0365522"
+    },
+    {
+      "file": "grok_gadgets_linux_sdk-0.1.0a1.tar.gz",
+      "sha256": "e79f5f2283247c2e1bf327287932456935b717be194ff83f9475e0643ff75188"
+    }
+  ]
+}

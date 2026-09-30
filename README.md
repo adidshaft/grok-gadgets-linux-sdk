@@ -2,7 +2,7 @@
 
 An independently installable Python library and loopback device agent for Linux gadget applications targeting Grok through the Grok Gadgets gateway. Original code Apache-2.0; independent of xAI. No alternative model backend.
 
-Status: local alpha. Python logic tested on macOS; actual Linux runtime and physical peripherals pending. Examples use explicit software simulation. Gateway protocol artifacts are pinned and hash-checked, not rewritten here.
+Status: local alpha. Python library, installed CLI example and gateway TCP integration passed on macOS and Linux aarch64 in Docker. Physical peripherals and Linux service lifecycle pending. Examples use explicit software simulation. Gateway protocol artifacts are pinned and hash-checked, not rewritten here.
 
 ```sh
 uv sync --frozen

@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-04",
+  "level": [
+    "build verified",
+    "simulated",
+    "Linux runtime verified"
+  ],
+  "image": "python@sha256:bab1b7ef4b450c81002278d035eff85ebe394ae94df904f7a3ba14f7e16e487b",
+  "kernel": "6.10.14-linuxkit",
+  "python": "3.11.17",
+  "machine": "aarch64",
+  "glibc": "2.41",
+  "network": "none",
+  "gateway_commit": "4cf42fffa32afa2e5ad022e3fa4797f474ba10a9",
+  "protocol_source_commit": "17d31686ad06d608f20b117e6f4070bacbff7a35",
+  "tests_passed": 15,
+  "grok_verified": false,
+  "hardware_verified": false,
+  "service_verified": false,
+  "dependency_wheels": [
+    {
+      "file": "attrs-26.1.0-py3-none-any.whl",
+      "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+    },
+    {
+      "file": "jsonschema-4.26.0-py3-none-any.whl",
+      "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce"
+    },
+    {
+      "file": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe"
+    },
+    {
+      "file": "referencing-0.37.0-py3-none-any.whl",
+      "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231"
+    },
+    {
+      "file": "rpds_py-2026.6.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+      "sha256": "acc992ab27b15f852c76755eb2ab7dce86585ddadba6fa5946e58556088845b4"
+    },
+    {
+      "file": "typing_extensions-4.16.0-py3-none-any.whl",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+    }
+  ]
+}
