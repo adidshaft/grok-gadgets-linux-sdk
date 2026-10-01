@@ -28,3 +28,9 @@ docker run --rm --network none -v "$SDK_DIR:/sdk:ro" -v "$GATEWAY_DIR/dist:/gate
 ```
 
 Evidence level: installed software simulation against a real local gateway TCP server. No actual Grok, physical peripheral, systemd, USB permission or independent human verification. No publication, push, account calls or deployment. Clean implementation commit and artifact hashes are recorded in the following checkpoint.
+
+## Committed checkpoint
+
+2026-10-04 16:28 UTC: clean implementation source `beb69c1ff38236adeb570c213d036fd225f8d41e` rebuilt with `uv build`; gateway source `84b06fb9bef0f01639c215f2b5ada83fe5074218`. New fresh macOS venv `/tmp/hard-lin-committed-venv` and new network-disabled Linux container repeated onboarding successfully against installed wheels. In both, installed-package unit/CLI tests passed: 18 collected, 13 executed, 5 optional source-gateway integrations skipped; the fresh custom verifier separately exercised real installed gateway transport. Full 18-case macOS source-gateway integration already passed before this commit. Built-in factory, missing/invalid factory categories, token redaction and help were verified.
+
+Artifacts from that exact implementation source: wheel SHA256 `afef63923c4bfafe758978ec444a5b52064c965f4443a68bf2107693cdf3711d`, sdist SHA256 `980b2521b053083f90c763561086d7c8b2681cd6a6cf1ab9db7db1013ddf0be4`; tracked metadata in `planning/artifacts.json`, ignored raw logs/manifests in `reports/hardening/`. This checkpoint is a documentation-only follow-up; these package hashes refer to the stated implementation commit. The coordinator's final publication archive must identify its own actual source HEADs when rebuilt.

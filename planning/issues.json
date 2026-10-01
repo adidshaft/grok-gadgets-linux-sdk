@@ -112,11 +112,13 @@
       "help wanted"
     ],
     "milestone": "MH",
-    "stage": "in progress",
-    "commits": [],
+    "stage": "done",
+    "commits": [
+      "beb69c1ff38236adeb570c213d036fd225f8d41e"
+    ],
     "evidence": [
       "docs/verification/hardening.md",
-      "Fresh macOS and actual pinned Linux installed-wheel custom display.set acceptance passed; implementation commit pending"
+      "18 full macOS tests passed; clean implementation wheel custom display.set onboarding passed macOS and actual pinned Linux; installed safe factory tests passed both platforms (13 passed, 5 optional source-gateway cases skipped)"
     ],
     "blocker": null
   }
