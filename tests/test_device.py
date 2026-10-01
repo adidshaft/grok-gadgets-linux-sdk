@@ -71,7 +71,7 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("TOKEN", json.dumps(ack))
 
     def test_pinned_fixtures_validate_and_match_hashes(self):
-        self.assertEqual(SOURCE["source_commit"], "17d31686ad06d608f20b117e6f4070bacbff7a35")
+        self.assertEqual(SOURCE["source_commit"], "84b06fb9bef0f01639c215f2b5ada83fe5074218")
         fixture = files("grok_gadgets_linux").joinpath(
             "protocol", "0.1.0", "fixtures", "device-transcript.json"
         )
