@@ -90,5 +90,34 @@
     "stage": "blocked",
     "commits": [],
     "evidence": "Linux aarch64 Docker kernel6.10.14-linuxkit CPython3.11.17 wheel acceptance passed; physical peripherals and systemd remain pending"
+  },
+  {
+    "id": "HARD-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Make documented custom gadget installation work",
+    "intended_behaviour": "Make documented custom gadget installation work",
+    "acceptance": [
+      "Clean installed wheel custom factory registers,executes,reports state",
+      "No implicit PYTHONPATH or editable import",
+      "macOS and actual Linux acceptance and safe errors"
+    ],
+    "dependencies": [
+      "HARD-001"
+    ],
+    "labels": [
+      "bug",
+      "linux",
+      "P1",
+      "help wanted"
+    ],
+    "milestone": "MH",
+    "stage": "in progress",
+    "commits": [],
+    "evidence": [
+      "docs/verification/hardening.md",
+      "Fresh macOS and actual pinned Linux installed-wheel custom display.set acceptance passed; implementation commit pending"
+    ],
+    "blocker": null
   }
 ]
