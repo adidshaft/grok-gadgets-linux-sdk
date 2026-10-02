@@ -1,6 +1,6 @@
 """Run with fresh wheel-installed Python; no source imports or editable installations.
 
-Usage: /fresh/venv/bin/python -I scripts/check_onboarding.py docs/development.md
+Usage: /fresh/venv/bin/python -I scripts/check_onboarding.py docs/development.md [--dataclass]
 Both SDK and gateway wheels must be installed in that environment.
 """
 
@@ -24,9 +24,18 @@ async def eventually(predicate):
             await asyncio.sleep(0.01)
 
 
-async def check(document):
+async def check(document, *, dataclass=False):
     assert "site-packages" in grok_gadgets_linux.__file__
     example = document.read_text().split("```python\n", 1)[1].split("```", 1)[0]
+    if dataclass:
+        example = (
+            "from __future__ import annotations\n"
+            "from dataclasses import dataclass\n\n"
+            "@dataclass\n"
+            "class Settings:\n"
+            '    label: str = "Software display"\n\n'
+            + example.replace('"Software display"', "Settings().label")
+        )
     with tempfile.TemporaryDirectory(prefix="grok-custom-") as directory:
         cwd = Path(directory)
         (cwd / "my_gadget.py").write_text(example)
@@ -68,6 +77,7 @@ async def check(document):
                         "python": platform.python_version(),
                         "installed_package": grok_gadgets_linux.__file__,
                         "sdk_version": importlib.metadata.version("grok-gadgets-linux-sdk"),
+                        "factory_variant": "annotated dataclass" if dataclass else "documented",
                         "custom_capability": "display.set",
                         "ack": "executed",
                         "state": state["state"],
@@ -97,4 +107,4 @@ async def check(document):
         assert help_process.returncode == 0 and b"--factory-file" in help_text
 
 
-asyncio.run(check(Path(sys.argv[1]).resolve()))
+asyncio.run(check(Path(sys.argv[1]).resolve(), dataclass="--dataclass" in sys.argv[2:]))

@@ -21,6 +21,50 @@ class FactoryTests(unittest.TestCase):
             self.assertEqual(load_factory(f"{file}:create", file=True).device_id, "test")
             self.assertEqual(sys.path, before)
 
+    def test_annotated_dataclasses_repeated_loads_and_same_filename(self):
+        source = """from __future__ import annotations
+from dataclasses import dataclass
+from grok_gadgets_linux import Device
+
+@dataclass
+class Settings:
+    label: str = "LABEL"
+
+def create():
+    return Device("test", Settings().label, simulated=True, state={"module": __name__})
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory) / "first" / "gadget.py"
+            second = Path(directory) / "second" / "gadget.py"
+            first.parent.mkdir()
+            second.parent.mkdir()
+            first.write_text(source.replace("LABEL", "first"))
+            second.write_text(source.replace("LABEL", "second"))
+            before = list(sys.path)
+            devices = [load_factory(f"{path}:create", file=True) for path in (first, first, second)]
+            names = [device.state["module"] for device in devices]
+            self.assertEqual(len(set(names)), 3)
+            self.assertEqual(
+                [sys.modules[name].Settings().label for name in names], ["first", "first", "second"]
+            )
+            self.assertEqual(sys.path, before)
+            # Existing class metadata still resolves its defining module after subsequent loads.
+            from typing import get_type_hints
+
+            for name in names:
+                self.assertEqual(get_type_hints(sys.modules[name].Settings), {"label": str})
+
+    def test_failed_file_load_rolls_back_its_module_registration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            file = Path(directory) / "failed.py"
+            file.write_text('raise RuntimeError("PRIVATE_TOKEN")\n')
+            before = {name for name in sys.modules if name.startswith("_grok_trusted_factory_")}
+            with self.assertRaises(FactoryError) as caught:
+                load_factory(f"{file}:create", file=True)
+            after = {name for name in sys.modules if name.startswith("_grok_trusted_factory_")}
+            self.assertEqual(after, before)
+            self.assertNotIn("PRIVATE_TOKEN", str(caught.exception))
+
     def test_safe_actionable_failure_categories(self):
         with tempfile.TemporaryDirectory() as directory:
             file = Path(directory) / "gadget.py"

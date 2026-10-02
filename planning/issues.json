@@ -112,13 +112,14 @@
       "help wanted"
     ],
     "milestone": "MH",
-    "stage": "done",
+    "stage": "in progress",
     "commits": [
       "beb69c1ff38236adeb570c213d036fd225f8d41e"
     ],
     "evidence": [
       "docs/verification/hardening.md",
-      "18 full macOS tests passed; clean implementation wheel custom display.set onboarding passed macOS and actual pinned Linux; installed safe factory tests passed both platforms (13 passed, 5 optional source-gateway cases skipped)"
+      "18 full macOS tests passed; clean implementation wheel custom display.set onboarding passed macOS and actual pinned Linux; installed safe factory tests passed both platforms (13 passed, 5 optional source-gateway cases skipped)",
+      "Independent Astra review reopened: annotated stdlib dataclass factory fails because defining module absent from sys.modules; correction and fresh installed acceptance pending"
     ],
     "blocker": null
   }
