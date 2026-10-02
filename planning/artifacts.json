@@ -1,20 +1,20 @@
 {
   "status": "unpublished local build",
   "version": "0.1.0a1",
-  "source_commit": "beb69c1ff38236adeb570c213d036fd225f8d41e",
+  "source_commit": "89478e51488764dd1d28618d7028973e5546e4a6",
   "source_status_at_build": "clean",
-  "built_at_utc": "2026-10-04T16:28:01.935120+00:00",
+  "built_at_utc": "2026-10-04T16:41:44.812911+00:00",
   "build": "uv build; CPython3.11.15 macOSarm64 hatchling1.27.0",
   "artifacts": [
     {
       "file": "grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl",
-      "sha256": "afef63923c4bfafe758978ec444a5b52064c965f4443a68bf2107693cdf3711d",
-      "bytes": 18802
+      "sha256": "79c3bbb464977e088b3461d9359900ec638ee6df601731dcd3ec8191f0835493",
+      "bytes": 18977
     },
     {
       "file": "grok_gadgets_linux_sdk-0.1.0a1.tar.gz",
-      "sha256": "980b2521b053083f90c763561086d7c8b2681cd6a6cf1ab9db7db1013ddf0be4",
-      "bytes": 44778
+      "sha256": "24103c8239de90d4b778ce411ce7f2f3c8af3a29bac63c597c3226e0f1fa260c",
+      "bytes": 47000
     }
   ]
 }
