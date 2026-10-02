@@ -7,6 +7,7 @@ import importlib.util
 import os
 import sys
 from pathlib import Path
+from uuid import uuid4
 
 from .device import Device
 
@@ -29,11 +30,20 @@ def load_factory(factory, *, file=False):
         path = Path(location).expanduser()
         if path.suffix != ".py" or not path.is_file():
             raise FactoryError("Factory file unavailable; select an existing trusted .py file.")
+        # Each explicit execution owns a distinct module; preserve existing class metadata
+        # when the same file (or another file with the same basename) is loaded again.
+        module_name = f"_grok_trusted_factory_{uuid4().hex}"
+        while module_name in sys.modules:
+            module_name = f"_grok_trusted_factory_{uuid4().hex}"
         try:
-            spec = importlib.util.spec_from_file_location("_grok_trusted_factory", path.resolve())
+            spec = importlib.util.spec_from_file_location(module_name, path.resolve())
             module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
             spec.loader.exec_module(module)
-        except Exception:
+        except BaseException as error:
+            sys.modules.pop(module_name, None)
+            if not isinstance(error, Exception):
+                raise
             raise FactoryError(
                 "Factory file could not load; check syntax and installed dependencies."
             ) from None
