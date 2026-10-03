@@ -1,5 +1,8 @@
 # Verification — 4 October 2026
 
+Historical software verification checkpoints. For current first-run instructions and
+launch checks use [README](../README.md) and [launch verification](verification/launch-docs.md).
+
 H2 correction: explicit trusted custom-file onboarding now passes from fresh wheel installations on macOS and actual pinned Linux. See [hardening evidence](verification/hardening.md) for source commit, current canonical pin, failures, commands and artifacts. The earlier 15-case snapshot below is historical.
 
 15 tests passed on macOS (CPython 3.11.15 arm64) and on actual Linux in Docker: clean built-wheel install, generic async custom capability, schema/argument checks, bounded command dedup (including concurrency and eviction), event ordering/backpressure, capped backoff/exhaustion/stop, real authenticated gateway TCP, revocation with no retries, gateway restart reconnect, handler timeout remaining unconfirmed, and installed software-lamp CLI subprocess with explicit simulated button edges. Tests use gateway commit `4cf42fffa32afa2e5ad022e3fa4797f474ba10a9`; canonical protocol copies remain pinned to `17d31686ad06d608f20b117e6f4070bacbff7a35`.

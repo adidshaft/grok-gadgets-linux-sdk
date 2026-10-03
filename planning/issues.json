@@ -41,7 +41,7 @@
     "commits": [
       "937e1c3"
     ],
-    "evidence": "8 macOS unit tests plus pinned SHA256 contract loading; actual Linux pending"
+    "evidence": "Historical LIN-002 checkpoint: 8 macOS unit tests plus pinned SHA256 contract loading; Linux was pending then and was subsequently recorded under LIN-003."
   },
   {
     "id": "LIN-003",
@@ -120,8 +120,33 @@
     "evidence": [
       "docs/verification/hardening.md",
       "18 full macOS tests passed; clean implementation wheel custom display.set onboarding passed macOS and actual pinned Linux; installed safe factory tests passed both platforms (13 passed, 5 optional source-gateway cases skipped)",
-      "Independent Astra review reopened: annotated stdlib dataclass factory fails because defining module absent from sys.modules; correction and fresh installed acceptance pending",
+      "Historical source review reopened before the correction below: annotated stdlib dataclass factory failed because its defining module was absent from sys.modules.",
       "Review correction89478e5:20 full macOS tests; fresh installed docs+annotated dataclass factories register/execute/report on macOS and actual pinned Linux;15 installed tests pass+5 optional source-gateway skips on both; module rollback/unique repeated loads covered"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "LAUNCH-DOCS-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Prepare a standalone custom-device newcomer journey and public-alpha policies",
+    "acceptance": [
+      "Fresh installed README example acknowledges custom state through separately installed gateway",
+      "Accurate Mermaid and support/runtime/evidence table",
+      "Canonical public policy links, actual owner/contact, research Max rule",
+      "Runtime/protocol/LICENSE/NOTICE unchanged; historical privacy disposition recorded"
+    ],
+    "dependencies": [],
+    "labels": [
+      "docs",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "in progress",
+    "commits": [],
+    "evidence": [
+      "L2/L3/L6 preparation in progress; no external activation."
     ],
     "blocker": null
   }
