@@ -12,7 +12,7 @@ files are unchanged. Earlier Linux-container evidence remains historical and lin
 - `uv run python -m unittest discover -s tests -v`: 20 collected, 15 passed;
   five optional gateway-source cases explicitly skipped in this standalone checkout.
 - Hub `python3 scripts/check.py`: passed; 35 labeled records and Python syntax verified.
-- 35 relative links in changed Markdown resolved locally; the Mermaid diagram was
+- 36 relative links in changed Markdown resolved locally; the Mermaid diagram was
   inspected against the local SDK/agent/gateway interfaces. External destinations
   remain pending activation.
 
