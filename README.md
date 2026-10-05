@@ -10,10 +10,10 @@ experimental alpha.
 
 - **Local MCP client on the same computer:** works. A client that starts the gateway
   can list your gadget and call its functions. Tested in software only.
-- **Grok Bot (cloud):** reaches a Linux gadget only if you run the gateway's
-  `grok-gadgets-gateway serve` mode and expose it through your own authenticated HTTPS
-  tunnel. This route is implemented in the gateway but **not verified with Grok Bot**.
-  Never expose the agent's device port (8765).
+- **Grok Bot (cloud):** cannot open this computer. Loopback
+  `grok-gadgets-gateway serve` exists. A cloud Bot would also need HTTPS that you
+  run in front of it. That remote route is **not implemented here** and is **not
+  verified with Grok Bot**. Never expose the agent's device port (8765).
 - **Not verified:** physical peripherals, real systemd operation, Raspberry Pi hardware,
   and any actual Grok invocation.
 
