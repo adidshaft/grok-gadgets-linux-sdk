@@ -11,6 +11,24 @@ Linux: official image `python@sha256:bab1b7ef4b450c81002278d035eff85ebe394ae94df
 
 Checks passed: frozen uv installation, Ruff lint/format, wheel/sdist, macOS integration and clean Linux-wheel acceptance in the container. A standalone clone's default suite intentionally skips the gateway integration cases; set GROK_GATEWAY_SOURCE or use the container procedure to execute them. At the time of this record GitHub CI had not run; an external review later reported the `Checks` workflow succeeding on `main` on 5 October 2026 (Python 3.11 only, before the 3.11–3.14 matrix). User service template has not been enabled/tested under systemd.
 
+## Recheck after review fixes — 5 October 2026
+
+SDK commit `0ea4544` (REVIEW-LIN-001…009); wheel sha256
+`2955f1cb09da058c91cffe33b664a013f142ee0fc172e4037afb8d552579ae2c`. Gateway source:
+a copy of the gateway working tree at commit `e9d4874` with three uncommitted files from
+concurrent gateway work (`cli.py`, `transport.py`, `tests/test_transports.py`).
+
+- Linux container software acceptance (partial): the same pinned image
+  (`python@sha256:bab1b7ef…`, local image ID `86553475442d`), `--network none`, offline
+  wheelhouse, read-only mounts. Linux 6.10.14-linuxkit aarch64, glibc 2.41, CPython
+  3.11.17. Installed wheel from site-packages; 41 tests passed, 0 skipped, including
+  gateway integration, the shipped unit's `ExecStart` from a temporary home folder
+  (no systemd in the container) and SIGTERM cleanup. Docker ran on macOS.
+- macOS arm64, CPython 3.11.15: fresh-wheel `check_onboarding.py`, documented and
+  `--dataclass` variants, `"ack": "executed"`, `physical_verified: false`.
+
+Not verified: a non-container Linux host, systemd, a Raspberry Pi, GPIO, Grok.
+
 Repeat Linux acceptance after building the wheel:
 
 ```sh

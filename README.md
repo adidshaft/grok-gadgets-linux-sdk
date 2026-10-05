@@ -107,8 +107,8 @@ No Raspberry Pi was used to test this SDK.
 
 | Path | Evidence | Remaining limit |
 | --- | --- | --- |
-| macOS arm64, CPython 3.11.15, 3.12.13, 3.14.7; 3.13.5 x86_64 | Unit, CLI, shipped-unit `ExecStart` (no systemd) and gateway-source integration tests, 5 October 2026 | Not Linux |
-| Linux aarch64 container, CPython 3.11.17 | Linux container software acceptance (partial), 4 October 2026, before the current changes | Other distributions; real service and peripherals |
+| macOS arm64, CPython 3.11.15, 3.12.13, 3.13.15, 3.14.7 | Unit, CLI, shipped-unit `ExecStart` (no systemd) and gateway-source integration tests, 5 October 2026 | Not Linux |
+| Linux aarch64 container, CPython 3.11.17 | Linux container software acceptance (partial): installed-wheel tests with gateway integration, 5 October 2026 | A non-container Linux host; other distributions; real service and peripherals |
 | Windows / Intel Mac | Not verified | Installation and runtime checks |
 | Grok / mobile | Not verified | Supported route to the gateway |
 | systemd / peripherals | Template and APIs supplied; not operated | Authorized host and peripheral observations |
