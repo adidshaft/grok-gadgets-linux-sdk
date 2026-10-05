@@ -97,6 +97,8 @@ def create():
 
 Declare an inline Draft 2020-12 schema for arguments. The SDK does not allow schema references. Without a schema, it accepts any JSON object. In that case, validate arguments in the handler.
 
+The gateway rejects `pattern` and `patternProperties`. Use explicit properties, `enum`, `minLength` and `maxLength` instead. This prevents a device-supplied regular expression from blocking the gateway.
+
 `rgb.set` always uses the canonical schema for strict RGB channels and the `on` value. Invalid or oversized returned state produces `handler_failed`. Exceptions produce fixed error messages without raw exception text.
 
 The SDK serializes concurrent calls. See the retry limits below before you use a handler for physical actions.
