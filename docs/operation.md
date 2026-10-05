@@ -5,9 +5,9 @@ The agent connects only to loopback TCP: `127.0.0.1` or `::1`. The default port 
 Local simulation needs no public hosting. You operate the gateway and agent on this host.
 Grok/xAI hosts Grok Bot; it does not host these processes for you.
 
-The gateway has local stdio MCP and an authenticated loopback device port. The gateway
-repository is adding a long-running `grok-gadgets-gateway serve` mode; see the gateway
-README for its status and flags. Never tunnel the device port.
+The gateway has local stdio MCP and authenticated HTTP MCP through
+`grok-gadgets-gateway serve`. `serve` keeps running without an MCP client. Both modes
+can run the loopback device listener. Never tunnel the device port.
 A tunnel adds reachability. It does not add authentication.
 `HARD-GROK-REMOTE-001` tracks the remote route.
 See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
@@ -15,25 +15,45 @@ for the future cloud route and product hosting choices.
 
 ## Start the agent
 
-1. Install the gateway. Follow its README.
+1. Install both packages as shown in the [README](../README.md#quickstart).
+   Run `.venv/bin/grok-gadgets-gateway init` to create the credential registry and MCP bearer.
 2. Get a per-device token: `grok-gadgets-gateway enroll linux-lamp-1`. It prints
    `GROK_GADGETS_DEVICE_TOKEN=...`. The gateway owns this command; see its README for
    the credential-file option. The default software device ID is `linux-lamp-1`.
 3. Start the gateway so that its device listener runs: either `grok-gadgets-gateway serve`,
    or an MCP client that starts the gateway with `--credentials` (see below). A gateway
-   started without a credential file has no device listener.
+   started over stdio without a credential file has no device listener.
 4. Set `GROK_GADGETS_DEVICE_TOKEN` privately to the token. `GROK_DEVICE_TOKEN` still
    works but is deprecated.
-5. Run `uv run grok-linux-agent`.
+5. Run `.venv/bin/grok-linux-agent`.
 6. Request device capabilities through gateway MCP.
 
 The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory-file ./my_gadget.py:create` or `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
 
 ### Connect a local MCP client
 
-A local MCP client (one that runs commands on this computer) starts the gateway over
-stdio. Use absolute paths. The listener on `--device-port` runs while the client keeps
-the gateway running:
+For the running `serve` process in the quickstart, use a client that supports
+Streamable HTTP and an `Authorization` header:
+
+```json
+{
+  "mcpServers": {
+    "grok-gadgets": {
+      "url": "http://127.0.0.1:8766/mcp",
+      "headers": {"Authorization": "Bearer <mcp-token>"}
+    }
+  }
+}
+```
+
+Replace `<mcp-token>` privately with the single line from
+`~/.config/grok-gadgets/mcp-token`. If you set `XDG_CONFIG_HOME`, use that directory
+instead of `~/.config`. This is the MCP token, not the device token. Keep the settings
+private. Exact client settings depend on the client; Grok Bot cannot open this URL.
+
+Alternatively, stop `serve` and let a local MCP client start the gateway over stdio.
+Do not start both modes on the same device port. Use absolute paths. The listener on
+`--device-port` runs while the client keeps the gateway running:
 
 ```json
 {
@@ -54,7 +74,9 @@ your computer. This snippet is not verified with a specific MCP client.
 
 SDK integration tests start `DeviceServer` directly on temporary loopback ports. They do not use a paid API call or a live Grok account.
 
-Keep both services running while you need the device. Keep ordinary peripheral controls independent of Grok. When the agent stops, the gateway marks it offline. Closing an MCP client does not necessarily stop either service.
+Keep both services running while you need the device. Keep ordinary peripheral controls
+independent of Grok Bot. When the agent stops, the gateway marks it offline. Closing an
+HTTP client leaves `serve` running. A stdio gateway ends when its client closes stdin.
 
 A command can be accepted without a confirmed result. A reported result does not prove a physical effect. Record each evidence level separately.
 
@@ -96,7 +118,7 @@ never contains tokens, arguments or gateway text.
 | 0 | `signal` | Stopped by SIGTERM or SIGINT |
 | 1 | `internal_error` | Unexpected failure; inspect it privately |
 | 2 | `factory_error`, `token_missing`, `token_invalid`, `invalid_option`, `simulation_only` | Configuration; argparse usage errors also exit 2 |
-| 3 | `unauthorized`, `revoked` | Enroll the device again and set its new token |
+| 3 | `unauthorized`, `revoked` | Check the device ID and token; see token recovery below |
 | 4 | `protocol_mismatch`, `invalid_request`, `invalid_response`, `frame_too_large`, `duplicate_conflict` | Protocol contract; for example, a hello larger than 2048 bytes |
 | 5 | `reconnect_exhausted` | No gateway answered within the attempt budget |
 
@@ -110,6 +132,19 @@ After a gateway restart, the gateway can send a command ID that the device alrea
 executed. The same arguments return the cached status with current state. Changed
 arguments return a failed acknowledgement with `duplicate_conflict`; the agent stays
 connected.
+
+## Recover a device token
+
+`enroll` creates a new ID; it does not replace an existing ID or undo revocation.
+For a later run, the original token is under your device ID in the private
+`~/.config/grok-gadgets/credentials.json` file. Load it into
+`GROK_GADGETS_DEVICE_TOKEN` without printing it or saving it in shell history.
+`XDG_CONFIG_HOME` can change this file's parent directory.
+
+To replace a revoked or exposed token, enroll a new device ID and use that ID in your
+`Device(...)` factory. Revoke the old ID. Keep the factory ID and new token together.
+The gateway's [enrollment guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#per-device-credential-enrollment)
+also documents private registry edits when you must keep an ID.
 
 ## Prepare a Linux user service
 

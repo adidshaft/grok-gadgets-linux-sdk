@@ -16,6 +16,7 @@ secrets.h
 *.p12
 *.pfx
 my-light.json
+my_gadget.py
 fresh-run.jsonl
 
 # Environments, caches and generated output.

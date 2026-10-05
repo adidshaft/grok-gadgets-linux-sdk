@@ -26,7 +26,8 @@ an invented response deadline.
   your handlers. Loopback-only binding stops other computers, not other local users or
   compromised local processes. Mitigations today: run the agent on a single-user host,
   start the gateway before the agent, treat every local account as able to operate the
-  device, and revoke and re-enroll the token if another process may have held the port.
+  device, and revoke the token if another process may have held the port. Enroll a new
+  device ID and update the factory and token before reconnecting.
   Mutual authentication (for example a Unix socket with peer-UID checks, or a
   challenge-response that never sends the token) needs a protocol change and is
   deferred to protocol 0.2.

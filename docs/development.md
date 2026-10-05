@@ -2,11 +2,12 @@
 
 Use Python 3.11 or later. Install the source with `uv sync --frozen`, or install a built wheel in a virtual environment.
 
-The SDK implements your device. The gateway provides the tools for Grok. The SDK does not call a model or backend.
+The SDK implements your device. The gateway provides the tools intended for your existing Grok Bot. The SDK does not call a model or backend.
 
 Develop and simulate on one host without public hosting. The agent connects to the gateway's
 authenticated loopback device port. Local MCP clients use stdio. These are different interfaces.
-The gateway has no remote HTTPS or OAuth MCP service. Do not expose the device port through a tunnel.
+The gateway also has authenticated HTTP MCP on loopback through `serve`. It does not
+supply public HTTPS or OAuth. Do not expose the device port through a tunnel.
 See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
 for gateway ownership, the `HARD-GROK-REMOTE-001` gate, and future product options.
 
@@ -35,23 +36,12 @@ def create():
 
 ## Install and start the agent
 
-1. Create a directory outside the checkout.
-2. Replace `/absolute/path` with the wheel location.
-3. Create an environment and install the wheel:
+Follow the [README quickstart](../README.md#quickstart) to install both packages and
+start the gateway. Use the `display-1` example above in place of the README lamp.
+In the second terminal, enroll the matching device ID once and start the agent:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install /absolute/path/grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl
-```
-
-4. Save `my_gadget.py` in this directory.
-5. Get a token: `grok-gadgets-gateway enroll display-1` prints `GROK_GADGETS_DEVICE_TOKEN=...`.
-6. Start the gateway with its device listener on loopback port 8765
-   (`grok-gadgets-gateway serve`, or an MCP client; see [operation](operation.md)).
-7. Set `GROK_GADGETS_DEVICE_TOKEN` privately to the printed token.
-8. Start the agent:
-
-```sh
+export "$(.venv/bin/grok-gadgets-gateway enroll display-1)"
 .venv/bin/grok-linux-agent --factory-file ./my_gadget.py:create
 ```
 
@@ -130,13 +120,14 @@ Use `device.emit("button", {"pressed": True})` to queue a press event. Queue a s
 Declare each event name with `device.event_capability(name)`. A custom event name (for
 example `motion`) is sent with the inline schema
 `{"type": "object", "x-grok-gadgets-kind": "event"}`, so a gateway that reads this
-annotation does not offer it to Grok as a command. `button` is the built-in event.
+annotation does not offer it to Grok Bot as a command. `button` is the built-in event.
 `history_lost` is reserved and cannot be declared. Neither name can be a command.
 Each custom event uses about 55 bytes plus twice its name length of the 2048-byte hello frame.
 
 The default queue limit is 64 events. A full queue raises `event_queue_full`. The application must decide how to handle a full queue. Validated state and event values are copied to prevent later changes to those values.
 
 Example injection controls produce simulated events. They are not physical evidence.
+Events wait for a client to call `gadgets_read_events`; they do not start a Grok Bot task.
 
 ## Handle retries
 
@@ -154,6 +145,6 @@ Eviction or restart removes cached results. This is not durable exactly-once del
 
 ## Update the protocol
 
-The SDK checks copied protocol files against the [source manifest](../src/grok_gadgets_linux/protocol/source.json) at import. The pin is gateway commit `aeabcaf46cca830894836ac5cb85f3a6d33cd63d`.
+The SDK checks copied protocol files against the [source manifest](../src/grok_gadgets_linux/protocol/source.json) at import. That manifest records the current gateway commit and file hashes.
 
 Copy only a reviewed canonical version. Record its source and hashes. Do not edit copied schemas independently. The canonical transcript is a contract fixture, not a hardware recording.
