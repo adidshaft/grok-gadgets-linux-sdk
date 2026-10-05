@@ -1,18 +1,18 @@
 # Support
 
-Start with [README](README.md), [development](docs/development.md), and
-[operation/recovery](docs/operation.md). The software custom example needs no hardware or Grok account.
+Start with the [README](README.md), [development guide](docs/development.md) and [operation guide](docs/operation.md). The custom software example needs no hardware or Grok account.
 
-After activation, use [SDK issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues)
-for reproducible defects and scoped requests. These are planned destinations, not active
-support services in this local candidate. Use [local tracked work](planning/issues.json)
-during preparation. Include SDK/gateway versions, host/runtime, simulation versus
-physical evidence, exact commands, expected/observed behavior, and minimal redacted logs.
+Report defects and focused requests in [GitHub Issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues). Include:
 
-[r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/) is for community discussion when
-you choose to participate. Shared [support policy](https://github.com/adidshaft/grok-gadgets/blob/main/SUPPORT.md)
-lives in the hub. No response SLA is promised. Do not publish credentials, private paths,
-household state, event contents, or account captures.
+- SDK and gateway versions.
+- Host and runtime versions.
+- Whether the device is simulated or physical.
+- Exact commands.
+- Expected and observed results.
+- Minimal logs with private data removed.
 
-Use [SECURITY](SECURITY.md) for vulnerabilities. Conduct reports go privately to
-**adidshaft@kyokasuigetsu.xyz** under [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
+Use [r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/) for community discussion. The hub contains the [shared support policy](https://github.com/adidshaft/grok-gadgets/blob/main/SUPPORT.md). No response time is guaranteed.
+
+Do not post credentials, private paths, household state, event contents or account captures.
+
+Use [SECURITY](SECURITY.md) for vulnerabilities. Send private conduct reports to **adidshaft@kyokasuigetsu.xyz**. See [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
