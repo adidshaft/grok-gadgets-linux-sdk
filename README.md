@@ -90,7 +90,7 @@ Documentation uses an [ASD-STE100-inspired writing guide](https://github.com/adi
 flowchart LR
     A["Your functions"] --> S["SDK agent"]
     S <-->|"Loopback TCP 127.0.0.1:8765"| G["Gateway"]
-    C["Local MCP client"] -->|"stdio"| G
+    C["Local MCP client"] -->|"Authenticated HTTP or stdio"| G
     B["Cloud Grok Bot"] -.->|"Your authenticated HTTPS tunnel (unverified)"| G
 ```
 
