@@ -1,13 +1,20 @@
+# Systemd user unit template. Not yet verified under real systemd.
+# Install: ~/.config/systemd/user/grok-gadget.service
+# Start at boot without a login session: loginctl enable-linger "$USER"
+# Exit codes: 2 configuration, 3 unauthorized/revoked, 4 protocol contract (no restart);
+# other failures restart after 5 seconds.
+
 [Unit]
 Description=Grok Gadgets user device agent
-After=network.target
 
 [Service]
 Type=simple
 EnvironmentFile=%h/.config/grok-gadgets/linux-agent.env
-ExecStart=%h/grok-gadget/.venv/bin/grok-linux-agent --factory my_gadget:create
+ExecStart=%h/grok-gadget/.venv/bin/grok-linux-agent --factory-file %h/grok-gadget/my_gadget.py:create --retry-forever
 WorkingDirectory=%h/grok-gadget
-Restart=no
+Restart=on-failure
+RestartSec=5
+RestartPreventExitStatus=2 3 4
 NoNewPrivileges=true
 
 [Install]

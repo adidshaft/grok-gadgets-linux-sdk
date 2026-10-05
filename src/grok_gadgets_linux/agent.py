@@ -2,11 +2,23 @@
 
 import asyncio
 import json
+import random
 import time
 
 from .contracts import MAX_FRAME, RESPONSE_VALIDATOR, VERSION, SDKError, validate_request
 
-_FATAL = {"unauthorized", "revoked", "protocol_mismatch", "invalid_request", "duplicate_conflict"}
+AUTH_ERRORS = {"unauthorized", "revoked"}
+# Gateway-reported duplicate_conflict means a changed ACK/event for a retained ID: an SDK or
+# gateway contract fault that a reconnect cannot repair. Device-side conflicts never raise.
+CONTRACT_ERRORS = {
+    "protocol_mismatch",
+    "invalid_request",
+    "invalid_response",
+    "frame_too_large",
+    "duplicate_conflict",
+}
+_FATAL = AUTH_ERRORS | CONTRACT_ERRORS
+# Retryable: these plus connection_lost and remote_error (unknown codes, for forward compatibility).
 _KNOWN_ERRORS = _FATAL | {"stale_session", "unknown_command", "busy", "unavailable"}
 
 
@@ -31,8 +43,10 @@ class Agent:
             raise ValueError("Invalid port")
         if not 0.01 <= poll_interval <= 0.5:
             raise ValueError("Poll interval must be 0.01..0.5 seconds")
-        if type(reconnect_attempts) is not int or not 1 <= reconnect_attempts <= 32:
-            raise ValueError("Reconnect attempts must be 1..32")
+        if reconnect_attempts is not None and (
+            type(reconnect_attempts) is not int or not 1 <= reconnect_attempts <= 32
+        ):
+            raise ValueError("Reconnect attempts must be 1..32, or None to retry forever")
         if not 0 < backoff_initial <= backoff_cap <= 60:
             raise ValueError("Backoff must be positive and capped at 60 seconds")
         if not 0 < request_timeout <= 10 or not 0 < handler_timeout <= 10:
@@ -47,9 +61,12 @@ class Agent:
         self.connected = asyncio.Event()
         self.sessions = 0
         self.retries = 0
+        self._auth_grace = False
 
     def retry_delay(self, attempt):
-        return min(self.backoff_cap, self.backoff_initial * (2 ** min(attempt, 16)))
+        """Equal jitter: a random delay in [ceiling/2, ceiling] so agents do not retry in step."""
+        ceiling = min(self.backoff_cap, self.backoff_initial * (2 ** min(attempt, 16)))
+        return random.uniform(ceiling / 2, ceiling)
 
     async def exchange(self, reader, writer, message):
         writer.write(validate_request(message))
@@ -59,7 +76,7 @@ class Agent:
             raise SDKError("connection_lost")
         try:
             response = json.loads(line)
-        except (ValueError, UnicodeError):
+        except (ValueError, UnicodeError, RecursionError):
             raise SDKError("invalid_response") from None
         if not RESPONSE_VALIDATOR.is_valid(response):
             raise SDKError("invalid_response")
@@ -67,6 +84,26 @@ class Agent:
             code = response["error"]["code"]
             raise SDKError(code if code in _KNOWN_ERRORS else "remote_error")
         return response
+
+    async def _handle(self, command, stop):
+        """Run one handler; stop or timeout cancels it so its cleanup runs. None means stopping."""
+        task = asyncio.ensure_future(self.device.execute(command))
+        stopping = asyncio.ensure_future(stop.wait())
+        try:
+            await asyncio.wait(
+                {task, stopping}, timeout=self.handler_timeout, return_when=asyncio.FIRST_COMPLETED
+            )
+        finally:
+            stopping.cancel()
+            if not task.done():
+                task.cancel()
+                # Bounded: a handler that ignores cancellation cannot hold shutdown forever.
+                await asyncio.wait({task}, timeout=self.handler_timeout)
+        if task.done() and not task.cancelled():
+            return task.result()
+        if stop.is_set():
+            return None
+        raise TimeoutError
 
     async def _session(self, stop):
         reader, writer = await asyncio.wait_for(
@@ -77,6 +114,7 @@ class Agent:
             if hello.get("protocol_version") != VERSION or not hello.get("session_id"):
                 raise SDKError("protocol_mismatch")
             self.sessions += 1
+            self._auth_grace = True
             self.connected.set()
             while not stop.is_set():
                 if self.device.events:
@@ -90,7 +128,9 @@ class Agent:
                     raise SDKError("invalid_response")
                 for command in commands:
                     # A cancelled/timed-out handler receives no success ACK; gateway stays unconfirmed.
-                    ack = await asyncio.wait_for(self.device.execute(command), self.handler_timeout)
+                    ack = await self._handle(command, stop)
+                    if ack is None:
+                        return
                     await self.exchange(reader, writer, ack)
                 try:
                     await asyncio.wait_for(stop.wait(), self.poll_interval)
@@ -106,14 +146,24 @@ class Agent:
 
     async def run(self, stop=None):
         stop = stop or asyncio.Event()
+        try:
+            await self._run(stop)
+        finally:
+            await self.device.shutdown(self.handler_timeout)
+
+    async def _run(self, stop):
         failures = 0
+        self._auth_grace = False
         while not stop.is_set():
             started = time.monotonic()
             try:
                 await self._session(stop)
                 return
             except SDKError as error:
-                if error.code in _FATAL or error.code in {"invalid_response", "frame_too_large"}:
+                if error.code == "unauthorized" and self._auth_grace:
+                    # Possibly a transient gateway credential-file read; retry exactly once.
+                    self._auth_grace = False
+                elif error.code in _FATAL:
                     raise
             except (OSError, TimeoutError, ValueError):
                 pass
@@ -123,7 +173,7 @@ class Agent:
                 failures = 0
             failures += 1
             self.retries += 1
-            if failures >= self.reconnect_attempts:
+            if self.reconnect_attempts is not None and failures >= self.reconnect_attempts:
                 raise SDKError("reconnect_exhausted")
             try:
                 await asyncio.wait_for(stop.wait(), self.retry_delay(failures - 1))
