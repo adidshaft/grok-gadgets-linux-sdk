@@ -463,5 +463,30 @@
       "2026-10-05: Linux container software acceptance (partial) rerun, 41 tests passed; fresh-wheel onboarding passed on macOS"
     ],
     "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-010",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
+    "acceptance": [
+      "Copied protocol files match gateway b5f316e hashes",
+      "test_pinned_fixtures_validate_and_match_hashes passes"
+    ],
+    "dependencies": [
+      "REVIEW-LIN-009"
+    ],
+    "labels": [
+      "protocol",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/protocol/source.json"
+    ],
+    "blocker": null
   }
 ]
