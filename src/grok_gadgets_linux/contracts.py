@@ -22,6 +22,15 @@ _state.pop("oneOf")
 _state["$ref"] = "#/$defs/state"
 STATE_VALIDATOR = Draft202012Validator(_state)
 RGB_SCHEMA = SCHEMA["$defs"]["rgb"]
+# Fixed device-side failure messages; never include handler, argument or transport text.
+ACK_ERRORS = {
+    "unsupported_capability": "Device could not confirm requested execution",
+    "invalid_arguments": "Device could not confirm requested execution",
+    "handler_failed": "Device could not confirm requested execution",
+    "duplicate_conflict": "Command ID reused with changed arguments; not executed",
+}
+EVENT_KIND = "x-grok-gadgets-kind"
+RESERVED_EVENTS = {"button", "history_lost"}
 
 
 class SDKError(Exception):
@@ -35,17 +44,31 @@ class SDKError(Exception):
 def validate_request(message):
     if not REQUEST_VALIDATOR.is_valid(message):
         raise SDKError("invalid_request")
-    encoded = json.dumps(message, separators=(",", ":"), allow_nan=False).encode() + b"\n"
+    try:
+        encoded = json.dumps(message, separators=(",", ":"), allow_nan=False).encode() + b"\n"
+    except (ValueError, TypeError, RecursionError):
+        raise SDKError("invalid_request") from None
     if len(encoded) > MAX_FRAME:
         raise SDKError("frame_too_large")
     return encoded
 
 
+def worst_case_ack(state, command_id="x" * 64):
+    code, message = max(ACK_ERRORS.items(), key=lambda item: len(item[0]) + len(item[1]))
+    return {
+        "type": "ack",
+        "command_id": command_id,
+        "status": "failed",
+        "state": state,
+        "error": {"code": code, "message": message},
+    }
+
+
 def validate_state(state):
     if not STATE_VALIDATOR.is_valid(state):
         raise SDKError("invalid_state")
-    # Finite JSON values only, and verify standalone state fits a transport frame.
-    validate_request({"type": "state", "state": state})
+    # Finite JSON values only; the largest failed ACK carrying this state must fit a frame.
+    validate_request(worst_case_ack(state))
 
 
 def validate_inline_schema(schema):

@@ -1,5 +1,7 @@
 import asyncio
 import json
+import threading
+import time
 import unittest
 from importlib.resources import files
 
@@ -37,11 +39,153 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(device.state, {"custom": "hi"})
         self.assertEqual(await device.execute(command), ack)
         self.assertEqual(len(calls), 1)
-        with self.assertRaises(SDKError):
-            await device.execute({**command, "arguments": {"value": "changed"}})
+        conflict = await device.execute({**command, "arguments": {"value": "changed"}})
+        self.assertEqual(conflict["status"], "failed")
+        self.assertEqual(
+            conflict["error"],
+            {
+                "code": "duplicate_conflict",
+                "message": "Command ID reused with changed arguments; not executed",
+            },
+        )
+        self.assertEqual(len(calls), 1)
+        # The conflict is not cached: the original outcome is still replayed.
+        self.assertEqual(await device.execute(command), ack)
         bad = await device.execute({**command, "command_id": "c2", "arguments": {"value": 1}})
         self.assertEqual(bad["status"], "failed")
         self.assertEqual(len(calls), 1)
+
+    async def test_replay_reports_cached_status_with_current_state(self):
+        async def handler(arguments):
+            return {"value": arguments["value"]}
+
+        device = self.device().capability("x", handler)
+        command = {"command_id": "c1", "capability": "x", "arguments": {"value": "red"}}
+        self.assertEqual((await device.execute(command))["state"], {"value": "red"})
+        device.publish_state({"value": "blue"})
+        replay = await device.execute(command)
+        self.assertEqual(replay["status"], "executed")
+        self.assertEqual(replay["state"], {"value": "blue"})
+        failed = {"command_id": "c2", "capability": "absent", "arguments": {}}
+        await device.execute(failed)
+        device.publish_state({"value": "green"})
+        replay = await device.execute(failed)
+        self.assertEqual(replay["error"]["code"], "unsupported_capability")
+        self.assertEqual(replay["state"], {"value": "green"})
+
+    async def test_largest_state_still_fits_every_failed_ack(self):
+        device = self.device()
+        size = 0
+        for step in (1024, 256, 64, 16, 4, 1):
+            while True:
+                try:
+                    device.publish_state({"blob": "x" * (size + step)})
+                except SDKError as error:
+                    self.assertEqual(error.code, "frame_too_large")
+                    break
+                size += step
+        self.assertGreater(size, 1700)
+        self.assertEqual(device.state["blob"], "x" * size)
+        command = {"command_id": "c" * 64, "capability": "absent", "arguments": {}}
+        self.assertEqual((await device.execute(command))["status"], "failed")
+        conflict = await device.execute({**command, "arguments": {"changed": 1}})
+        self.assertEqual(conflict["error"]["code"], "duplicate_conflict")
+        self.assertLessEqual(len(validate_request(conflict)), 2048)
+
+    async def test_oversized_handler_state_fails_without_raising(self):
+        async def handler(arguments):
+            return {"blob": "x" * 1990}
+
+        device = self.device(state={"ok": 1}).capability("big", handler)
+        ack = await device.execute({"command_id": "c1", "capability": "big", "arguments": {}})
+        self.assertEqual(ack["error"]["code"], "handler_failed")
+        self.assertEqual(ack["state"], {"ok": 1})
+        self.assertEqual(device.results["c1"][1], "handler_failed")
+
+    def test_custom_events_are_annotated_and_reserved_names_guarded(self):
+        async def handler(arguments):
+            return {}
+
+        device = self.device().event_capability("button").event_capability("motion")
+        device.capability("relay.set", handler)
+        schemas = device.hello("fixture-token-only")["device"]["capability_schemas"]
+        self.assertEqual(schemas, {"motion": {"type": "object", "x-grok-gadgets-kind": "event"}})
+        for name in ("button", "history_lost"):
+            with self.assertRaises(SDKError):
+                self.device().capability(name, handler)
+        with self.assertRaises(SDKError):
+            self.device().event_capability("history_lost")
+        # Sixteen names (15 events + state) still fit the hello frame.
+        many = self.device()
+        for number in range(15):
+            many.event_capability(f"sensor.event-{number:02d}")
+        self.assertLessEqual(len(validate_request(many.hello("t" * 256))), 2048)
+
+    async def test_sync_handler_runs_in_thread_without_blocking_loop(self):
+        ticks = []
+        threads = []
+
+        def blocking(arguments):
+            threads.append(threading.current_thread() is threading.main_thread())
+            time.sleep(0.2)
+            return {"pin": arguments["pin"]}
+
+        async def ticker():
+            while True:
+                ticks.append(1)
+                await asyncio.sleep(0.01)
+
+        device = self.device().capability("gpio.set", blocking)
+        task = asyncio.create_task(ticker())
+        try:
+            ack = await device.execute(
+                {"command_id": "g1", "capability": "gpio.set", "arguments": {"pin": 1}}
+            )
+        finally:
+            task.cancel()
+        self.assertEqual(ack["state"], {"pin": 1})
+        self.assertEqual(threads, [False])
+        self.assertGreater(len(ticks), 5)
+
+    async def test_timed_out_sync_handler_never_overlaps_next_call(self):
+        running = []
+        overlaps = []
+
+        def blocking(arguments):
+            overlaps.append(bool(running))
+            running.append(1)
+            time.sleep(0.15)
+            running.pop()
+            return {}
+
+        device = self.device().capability("slow", blocking)
+        with self.assertRaises(TimeoutError):
+            await asyncio.wait_for(
+                device.execute({"command_id": "s1", "capability": "slow", "arguments": {}}), 0.02
+            )
+        await device.execute({"command_id": "s2", "capability": "slow", "arguments": {}})
+        self.assertEqual(overlaps, [False, False])
+
+    async def test_shutdown_callbacks_reverse_order_and_contained(self):
+        order = []
+        device = self.device()
+
+        def first():
+            order.append("first")
+
+        async def second():
+            raise RuntimeError("PRIVATE_TOKEN")
+
+        async def third():
+            order.append("third")
+
+        device.on_shutdown(first)
+        device.on_shutdown(second)
+        device.on_shutdown(third)
+        await device.shutdown(1)
+        self.assertEqual(order, ["third", "first"])
+        with self.assertRaises(TypeError):
+            device.on_shutdown(None)
 
     async def test_rgb_bounds_bool_and_handler_failure(self):
         async def handler(arguments):
@@ -71,7 +215,7 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("TOKEN", json.dumps(ack))
 
     def test_pinned_fixtures_validate_and_match_hashes(self):
-        self.assertEqual(SOURCE["source_commit"], "aeabcaf46cca830894836ac5cb85f3a6d33cd63d")
+        self.assertEqual(SOURCE["source_commit"], "135dbb8349eeccab88b7be5e804066bfbf2bcf23")
         fixture = files("grok_gadgets_linux").joinpath(
             "protocol", "0.1.0", "fixtures", "device-transcript.json"
         )
@@ -106,7 +250,8 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(SDKError):
             self.device().capability("x", handler, schema={"$ref": "https://example.com"})
         with self.assertRaises(TypeError):
-            self.device().capability("x", lambda arguments: arguments)
+            self.device().capability("x", None)
+        self.device().capability("x", lambda arguments: arguments)
 
     async def test_dedup_window_is_bounded_and_not_durable(self):
         calls = []

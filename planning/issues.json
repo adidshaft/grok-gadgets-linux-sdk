@@ -171,10 +171,326 @@
     ],
     "milestone": "PUBLIC-ALPHA",
     "stage": "done",
+    "commits": [
+      "24c3fa0"
+    ],
+    "evidence": [
+      ".github/workflows/checks.yml",
+      "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance",
+      "Hosted PR #10 on 24c3fa07c6845f2ae8e16ddb59692d8ba2278c8a: required aggregate check and all four Python matrix checks passed. Matrix failures propagate to the aggregate."
+    ],
+    "blocker": null
+  },
+  {
+    "id": "HOSTING-DOCS-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Explain hosting ownership and current remote connection limits",
+    "acceptance": [
+      "Relevant entry points link the canonical hub hosting FAQ",
+      "Local software use needs no public hosting; gateway remote HTTPS/OAuth MCP remains unimplemented",
+      "Tunnel reachability is distinct from authentication, native Grok invocation, and physical evidence",
+      "Agent or USB bridge shares the local gateway host; device transport must not be exposed",
+      "Product hosting options remain proposals; no service or tunnel is activated"
+    ],
+    "dependencies": [],
+    "labels": [
+      "docs",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "README.md",
+      "docs/development.md",
+      "docs/operation.md",
+      "Documentation only. Runtime, protocol and workflows unchanged. HARD-GROK-REMOTE-001 remains an unimplemented engineering gate; no tunnel or service activated.",
+      "2026-10-05: uv sync --frozen, Ruff check/format, and uv build passed. Unittest discovery passed 15 tests; 5 optional gateway-source integrations skipped. git diff --check passed."
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A reused command ID with changed arguments stops the agent; replays report stale state (review LIN-02, LIN-09)",
+    "acceptance": [
+      "A fingerprint conflict on a cached command_id answers a failed ACK with error code duplicate_conflict and a fixed message, runs no handler, and keeps the session",
+      "Cache hits return the cached status and error code with the current state, validated against the frame limit",
+      "Gateway-restart integration test reuses an ID with changed arguments and with identical arguments"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P0"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "tests/test_agent.py (GatewayIntegrationTests restart cases)",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-002",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A failed ACK can exceed the frame limit after a handler ran; nested JSON escapes Agent.run (review LIN-11 extends AUDIT-LIN-001 / issue #8; LIN-15)",
+    "acceptance": [
+      "State is limited so the largest failed ACK (64-character ID, longest fixed error) fits 2048 bytes",
+      "The worst-case ACK is pre-validated before any handler runs",
+      "RecursionError while decoding a reply becomes SDKError('invalid_response')"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/contracts.py",
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_device.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-003",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Custom event names are advertised to MCP clients as callable commands (review LIN-07)",
+    "acceptance": [
+      "event_capability(name) sends the inline schema {type: object, x-grok-gadgets-kind: event} for custom names",
+      "button stays the built-in event; history_lost is reserved; neither can be a command",
+      "Hello stays within 2048 bytes for 15 custom events",
+      "Gateway honouring the annotation is owned by the gateway repository and must be verified by the coordinator"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P2"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-004",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Synchronous handlers block the event loop and bypass handler_timeout (review LIN-08)",
+    "acceptance": [
+      "Plain-function handlers run in a worker thread automatically; async handlers are unchanged",
+      "The timeout bounds the await; a timed-out thread may continue, and the next blocking handler waits for it",
+      "docs/development.md documents this with a GPIO-style example"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P2"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "docs/development.md",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-005",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A transient gateway credential read failure reported as unauthorized kills connected agents (review LIN-03, SDK side)",
+    "acceptance": [
+      "After a successful hello in the same run, one unauthorized is retried with backoff; a second consecutive one stops the agent",
+      "revoked and unauthorized before any successful hello stay immediately fatal",
+      "unavailable and busy are retryable"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-006",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Service mode: unusable systemd template, SIGTERM skips cleanup, short unjittered retry budget, one CLI message for every failure (review LIN-04, LIN-05, LIN-10, LIN-12)",
+    "acceptance": [
+      "Template uses --factory-file %h/grok-gadget/my_gadget.py:create --retry-forever, Restart=on-failure, RestartSec=5, RestartPreventExitStatus=2 3 4, no After=network.target",
+      "SIGTERM and SIGINT set the stop event, cancel the in-flight handler and run Device.on_shutdown callbacks; exit 0",
+      "Reconnect backoff has equal jitter; --max-attempts N and --retry-forever (30 s ceiling)",
+      "CLI prints 'Agent stopped (<code>). <fixed hint>' with exit codes 2 configuration, 3 unauthorized/revoked, 4 contract, 5 reconnect exhausted",
+      "A test parses the shipped unit's ExecStart and runs it from a temporary HOME; this is not systemd verification",
+      "docs/operation.md documents loginctl enable-linger"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "examples/grok-gadget.service",
+      "src/grok_gadgets_linux/cli.py",
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_cli.py",
+      "tests/test_agent.py",
+      "docs/operation.md",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: shipped ExecStart test passed on macOS 3.11-3.14 and in the Linux container (no systemd); systemd itself not run"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-007",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Token environment variable differs from the gateway and USB bridge name",
+    "acceptance": [
+      "CLI reads GROK_GADGETS_DEVICE_TOKEN first",
+      "GROK_DEVICE_TOKEN remains a deprecated fallback with a stderr notice that never prints the value",
+      "Docs describe grok-gadgets-gateway enroll <device-id> as the way to get a token (implementation owned by the gateway repository)"
+    ],
+    "dependencies": [],
+    "labels": [
+      "maintenance",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/cli.py",
+      "tests/test_cli.py",
+      "scripts/check_onboarding.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-008",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "CI runs only Python 3.11 and integration hangs never fail (review LIN-01, SDK side)",
+    "acceptance": [
+      "checks.yml runs the frozen check sequence on Python 3.11, 3.12, 3.13 and 3.14 with pinned actions, read-only permissions and timeouts",
+      "Every gateway integration test and its teardown have a bounded timeout so a hang becomes a failure",
+      "Hosted CI execution remains unverified until the owner pushes"
+    ],
+    "dependencies": [],
+    "labels": [
+      "maintenance",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
     "commits": [],
     "evidence": [
       ".github/workflows/checks.yml",
-      "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance"
+      "tests/fake_gateway.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: local check sequence passed on CPython 3.11.15, 3.12.13, 3.13.15 and 3.14.7 with gateway-source integration; hosted matrix not run"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-009",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Docs overclaim evidence, name the demo as a listener, lack an MCP client recipe, Pi support notes and the one-way auth threat (review LIN-06, LIN-13, LIN-14, LIN-16, LIN-17)",
+    "acceptance": [
+      "README starts in plain language with an honest Grok Bot status and a 3-step quickstart",
+      "operation.md drops the local-demo listener claim and adds an MCP client config snippet",
+      "Evidence labels say 'Linux container software acceptance (partial)'; stale commit and CI statements updated",
+      "Supported Raspberry Pi models documented, including the armv6l rpds-py fallback",
+      "SECURITY.md documents one-way authentication; mutual authentication is deferred to protocol 0.2"
+    ],
+    "dependencies": [],
+    "labels": [
+      "docs",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "README.md",
+      "docs/operation.md",
+      "docs/verification.md",
+      "planning/linux-evidence.json",
+      "SECURITY.md",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: Linux container software acceptance (partial) rerun, 41 tests passed; fresh-wheel onboarding passed on macOS",
+      "2026-10-05 developer follow-up: corrected source installation, init before serve, token recovery and HTTP client setup. Frozen sync, Ruff lint/format, 41 tests including seven sibling-gateway cases and wheel/sdist passed. A fresh source install ran the exact README factory through init/enroll/serve, authenticated HTTP MCP discovery, lamp.set and state read; SIGTERM exited cleanly and logs contained no credentials. Software simulation on macOS, not Linux hardware or Grok Bot verification.",
+      "Developer guide states the gateway schema restrictions; the README diagram includes authenticated local HTTP."
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-010",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
+    "acceptance": [
+      "Copied protocol files match gateway 135dbb8 hashes",
+      "test_pinned_fixtures_validate_and_match_hashes passes"
+    ],
+    "dependencies": [
+      "REVIEW-LIN-009"
+    ],
+    "labels": [
+      "protocol",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/protocol/source.json"
     ],
     "blocker": null
   }
