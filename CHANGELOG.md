@@ -8,6 +8,21 @@ Installed software acceptance is recorded on macOS arm64 and Linux aarch64 in a 
 container. Physical peripherals, real systemd behavior, native Grok/mobile evidence,
 and independent human reproduction remain pending.
 
+### Review fixes, 2026-10-05 — unpublished
+
+- A reused command ID with changed arguments returns a failed `duplicate_conflict`
+  acknowledgement and keeps the session; replays report current state.
+- State is limited so every acknowledgement fits one 2048-byte frame (closes the
+  AUDIT-LIN-001 edge); deeply nested replies are `invalid_response`.
+- Custom event names carry `x-grok-gadgets-kind: event`; `history_lost` is reserved.
+- Plain-function handlers run in a worker thread; new `Device.on_shutdown(callback)`.
+- SIGTERM/SIGINT cancel the running handler and run shutdown hooks; one transient
+  `unauthorized` after a successful hello is retried; jittered backoff;
+  `--max-attempts` and `--retry-forever`; distinct exit codes 2/3/4/5.
+- `GROK_GADGETS_DEVICE_TOKEN` replaces `GROK_DEVICE_TOKEN` (deprecated fallback).
+- Usable systemd user-unit template; CI matrix for Python 3.11–3.14.
+- Plain-language README; corrected evidence labels and security limits.
+
 ### Launch preparation, 2026-10-05 — unpublished
 
 - Add a standalone fresh-wheel custom-device journey, architecture diagram, and runtime/evidence table.

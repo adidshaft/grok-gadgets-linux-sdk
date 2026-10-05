@@ -159,6 +159,22 @@ async def run_agent(*args, environment, cwd=None, timeout=10):
     return process.returncode, errors.decode()
 
 
+class ReadmeQuickstartTests(unittest.IsolatedAsyncioTestCase):
+    async def test_readme_gadget_loads_and_executes(self):
+        source = (ROOT / "README.md").read_text().split("```python\n", 1)[1].split("```", 1)[0]
+        self.assertLessEqual(len(source.strip().splitlines()), 12)
+        with tempfile.TemporaryDirectory() as directory:
+            file = Path(directory) / "my_gadget.py"
+            file.write_text(source)
+            device = load_factory(f"{file}:create", file=True)
+        command = {"command_id": "q1", "capability": "lamp.set", "arguments": {"on": True}}
+        ack = await device.execute(command)
+        self.assertEqual((ack["status"], ack["state"]), ("executed", {"on": True}))
+        bad = await device.execute({**command, "command_id": "q2", "arguments": {"on": 1}})
+        self.assertEqual(bad["error"]["code"], "invalid_arguments")
+        self.assertIn("lamp.set", device.hello(TOKEN)["device"]["capability_schemas"])
+
+
 class CliExitTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.directory = tempfile.TemporaryDirectory()

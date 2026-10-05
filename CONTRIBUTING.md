@@ -10,7 +10,7 @@ The hub owns [shared contribution policy](https://github.com/adidshaft/grok-gadg
 
 ## Standalone checks
 
-Use Python 3.11 or later and uv. Fork the repository and clone your fork. From the SDK root, run:
+Use Python 3.11 or later and uv. CI runs the same sequence on Python 3.11, 3.12, 3.13 and 3.14. Fork the repository and clone your fork. From the SDK root, run:
 
 ```sh
 git switch -c docs/clearer-device-example
@@ -21,7 +21,7 @@ uv run python -m unittest discover -s tests -v
 uv build
 ```
 
-These checks need no sibling checkout. Without `GROK_GATEWAY_SOURCE`, five gateway integration tests skip. This result does not prove full integration.
+These checks need no sibling checkout. Without `GROK_GATEWAY_SOURCE`, seven gateway integration tests skip. This result does not prove full integration. Each integration test has a time limit, so a hang is reported as a failure.
 
 For runtime or protocol changes, use a reviewed gateway source checkout:
 
@@ -33,8 +33,19 @@ Replace the placeholder with the checkout at the exact agreed commit. Record bot
 The hub separately tests the coordinated component combination; an isolated SDK success
 does not promote it automatically.
 
-For example, factory-loading, or installation guidance changes, also run the [README](README.md)
-fresh-wheel onboarding from outside the checkout. Run the lint/format/unit/build checks
+For example, factory-loading, or installation guidance changes, also run the fresh-wheel
+onboarding from an empty folder outside the checkout. Put the SDK wheel and sdist and the
+gateway wheel in that folder, then run:
+
+```sh
+uv venv --python 3.11 --seed .venv
+.venv/bin/python -m pip install ./grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl ./grok_gadgets_gateway-0.1.0a1-py3-none-any.whl
+tar -xzf grok_gadgets_linux_sdk-0.1.0a1.tar.gz
+.venv/bin/python -I grok_gadgets_linux_sdk-0.1.0a1/scripts/check_onboarding.py grok_gadgets_linux_sdk-0.1.0a1/docs/development.md
+```
+
+It runs the documented `my_gadget.py` with `--factory-file` against an authenticated
+loopback gateway and prints `"ack": "executed"`. Run the lint/format/unit/build checks
 before committing documentation as well as code. Linux service/peripheral claims need
 their own authorized Linux/hardware observations.
 
