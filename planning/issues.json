@@ -342,5 +342,65 @@
       "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
     ],
     "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-006",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Service mode: unusable systemd template, SIGTERM skips cleanup, short unjittered retry budget, one CLI message for every failure (review LIN-04, LIN-05, LIN-10, LIN-12)",
+    "acceptance": [
+      "Template uses --factory-file %h/grok-gadget/my_gadget.py:create --retry-forever, Restart=on-failure, RestartSec=5, RestartPreventExitStatus=2 3 4, no After=network.target",
+      "SIGTERM and SIGINT set the stop event, cancel the in-flight handler and run Device.on_shutdown callbacks; exit 0",
+      "Reconnect backoff has equal jitter; --max-attempts N and --retry-forever (30 s ceiling)",
+      "CLI prints 'Agent stopped (<code>). <fixed hint>' with exit codes 2 configuration, 3 unauthorized/revoked, 4 contract, 5 reconnect exhausted",
+      "A test parses the shipped unit's ExecStart and runs it from a temporary HOME; this is not systemd verification",
+      "docs/operation.md documents loginctl enable-linger"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "examples/grok-gadget.service",
+      "src/grok_gadgets_linux/cli.py",
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_cli.py",
+      "tests/test_agent.py",
+      "docs/operation.md",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-007",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Token environment variable differs from the gateway and USB bridge name",
+    "acceptance": [
+      "CLI reads GROK_GADGETS_DEVICE_TOKEN first",
+      "GROK_DEVICE_TOKEN remains a deprecated fallback with a stderr notice that never prints the value",
+      "Docs describe grok-gadgets-gateway enroll <device-id> as the way to get a token (implementation owned by the gateway repository)"
+    ],
+    "dependencies": [],
+    "labels": [
+      "maintenance",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/cli.py",
+      "tests/test_cli.py",
+      "scripts/check_onboarding.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
   }
 ]
