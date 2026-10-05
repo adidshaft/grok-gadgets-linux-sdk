@@ -372,7 +372,8 @@
       "tests/test_cli.py",
       "tests/test_agent.py",
       "docs/operation.md",
-      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: shipped ExecStart test passed on macOS 3.11-3.14 and in the Linux container (no systemd); systemd itself not run"
     ],
     "blocker": null
   },
@@ -426,7 +427,8 @@
       ".github/workflows/checks.yml",
       "tests/fake_gateway.py",
       "tests/test_agent.py",
-      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: local check sequence passed on CPython 3.11.15, 3.12.13, 3.13.15 and 3.14.7 with gateway-source integration; hosted matrix not run"
     ],
     "blocker": null
   },
@@ -457,7 +459,8 @@
       "docs/verification.md",
       "planning/linux-evidence.json",
       "SECURITY.md",
-      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
+      "2026-10-05: Linux container software acceptance (partial) rerun, 41 tests passed; fresh-wheel onboarding passed on macOS"
     ],
     "blocker": null
   }
