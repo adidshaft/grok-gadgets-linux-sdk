@@ -15,7 +15,7 @@
     "milestone": "M0",
     "stage": "done",
     "commits": [
-      "ec228ec"
+      "3082cd2"
     ],
     "evidence": "Foundation review"
   },
@@ -39,7 +39,7 @@
     "milestone": "M3",
     "stage": "done",
     "commits": [
-      "937e1c3"
+      "3737a30"
     ],
     "evidence": "Historical LIN-002 checkpoint: 8 macOS unit tests plus pinned SHA256 contract loading; Linux was pending then and was subsequently recorded under LIN-003."
   },
@@ -63,9 +63,9 @@
     "milestone": "M3",
     "stage": "done",
     "commits": [
-      "4df75b2"
+      "2c6c0d8"
     ],
-    "evidence": "15 tests on macOS and Linux-aarch64 Docker incl installed CLI + real gateway4cf42ff TCP; pinned Python digest and exact runtime in docs/verification.md"
+    "evidence": "15 tests on macOS and Linux-aarch64 Docker incl installed CLI + real gateway4606023 TCP; pinned Python digest and exact runtime in docs/verification.md"
   },
   {
     "id": "LIN-004",
@@ -114,14 +114,14 @@
     "milestone": "MH",
     "stage": "done",
     "commits": [
-      "beb69c1ff38236adeb570c213d036fd225f8d41e",
-      "89478e51488764dd1d28618d7028973e5546e4a6"
+      "ad3bb53ec06930af2625be6ef3abc6f8423002d9",
+      "7d0f82bbbf4292c2ece81982bf0d25e4ee27b633"
     ],
     "evidence": [
       "docs/verification/hardening.md",
       "18 full macOS tests passed; clean implementation wheel custom display.set onboarding passed macOS and actual pinned Linux; installed safe factory tests passed both platforms (13 passed, 5 optional source-gateway cases skipped)",
       "Historical source review reopened before the correction below: annotated stdlib dataclass factory failed because its defining module was absent from sys.modules.",
-      "Review correction89478e5:20 full macOS tests; fresh installed docs+annotated dataclass factories register/execute/report on macOS and actual pinned Linux;15 installed tests pass+5 optional source-gateway skips on both; module rollback/unique repeated loads covered"
+      "Review correction7d0f82b:20 full macOS tests; fresh installed docs+annotated dataclass factories register/execute/report on macOS and actual pinned Linux;15 installed tests pass+5 optional source-gateway skips on both; module rollback/unique repeated loads covered"
     ],
     "blocker": null
   },
@@ -145,11 +145,13 @@
     "milestone": "PUBLIC-ALPHA",
     "stage": "done",
     "commits": [
-      "94b9fb910c8cf58c6864146f1c1db18472315847"
+      "b075892586953cd9302f75c3f9256ba5a53207f8"
     ],
     "evidence": [
       "docs/verification/launch-docs.md: exact fresh installed README journey passed on macOS27 arm64 CPython3.11.15; canonical public-alpha policy/contact/CODEOWNERS and original Mermaid prepared.",
-      "Required source/lint/build checks and hub check passed; runtime/protocol/LICENSE/NOTICE unchanged. Bounded reachable-history identity/path findings remain an explicit publication-review gate; no external activation."
+      "Required source/lint/build checks and hub check passed; runtime/protocol/LICENSE/NOTICE unchanged. Bounded reachable-history identity/path findings remain an explicit publication-review gate; no external activation.",
+      "Publication sanitization on 5 October 2026 preserves every incremental commit, date and message; private author email and machine paths removed, commit references remapped. .gitignore and contributor maintenance instructions cover local configuration, secrets, caches, logs and build outputs while retaining reviewed examples.",
+      "Sanitized publication checkout: 20 unittest cases including gateway integrations, Ruff check/format and wheel/sdist builds pass; git check-ignore confirms sensitive/output paths are excluded and reviewed example paths remain addable."
     ],
     "blocker": null
   },

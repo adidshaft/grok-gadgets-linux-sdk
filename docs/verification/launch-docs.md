@@ -1,6 +1,6 @@
 # Public-alpha documentation verification
 
-LAUNCH-DOCS-LIN-001 covers L2/L3/L6 preparation from `ce897eee`. Checks on
+LAUNCH-DOCS-LIN-001 covers L2/L3/L6 preparation from `be66ea4e`. Checks on
 2026-10-05 used macOS 27 arm64, CPython 3.11.15. This is documentation/policy
 preparation; source, tests, scripts, examples, canonical copies/pins, metadata and lock
 files are unchanged. Earlier Linux-container evidence remains historical and linked.

@@ -60,3 +60,7 @@ Apache-2.0; no additional CLA or sign-off is required. Never include credentials
 captures. Do not publish, deploy, or operate live peripherals in an unapproved test.
 
 See [support](SUPPORT.md), [conduct](CODE_OF_CONDUCT.md), [security](SECURITY.md), and [AGENTS](AGENTS.md).
+
+## Ignore rules and publication privacy
+
+Keep `.gitignore` current whenever a new tool produces caches, build output, local device configurations, execution logs or credentials. Preserve reviewed sample configuration files and the hub's verified public simulator download. Check new patterns with `git check-ignore`, then review the staged file list before committing. Ignore rules do not remove tracked files or past history; never merge the private pre-publication history back into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.

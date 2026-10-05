@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "source_repository": "grok-gadgets-gateway",
-  "source_commit": "84b06fb9bef0f01639c215f2b5ada83fe5074218",
+  "source_commit": "221f73fddba8eec055d7de312066dbf0234d8f6e",
   "source_path": "protocol/0.1.0",
   "files": {
     "README.md": "b1ae2a5c8ea0933eb9bcedce01e8c7bbed5215591229a78932637f2a76f07ac1",
