@@ -3,7 +3,7 @@
   "level": [
     "build verified",
     "simulated",
-    "Linux runtime verified"
+    "Linux container software acceptance (partial)"
   ],
   "image": "python@sha256:bab1b7ef4b450c81002278d035eff85ebe394ae94df904f7a3ba14f7e16e487b",
   "kernel": "6.10.14-linuxkit",
@@ -42,5 +42,6 @@
       "file": "typing_extensions-4.16.0-py3-none-any.whl",
       "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
     }
-  ]
+  ],
+  "note": "Docker linuxkit container on a macOS host; not a Linux host, systemd, GPIO or Grok verification. Recorded before the REVIEW-LIN-001..009 changes and not repeated. Shipped protocol pin is aeabcaf46cca830894836ac5cb85f3a6d33cd63d in the public gateway repository."
 }
