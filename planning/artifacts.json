@@ -1,7 +1,7 @@
 {
   "status": "unpublished local build",
   "version": "0.1.0a1",
-  "source_commit": "7d0f82bbbf4292c2ece81982bf0d25e4ee27b633",
+  "source_commit": "abd7a28b1818316591fd7758ffeb7e78d26e057b",
   "source_status_at_build": "clean",
   "built_at_utc": "2026-10-04T16:41:44.812911+00:00",
   "build": "uv build; CPython3.11.15 macOSarm64 hatchling1.27.0",
