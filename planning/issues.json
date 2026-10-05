@@ -267,6 +267,32 @@
     "blocker": null
   },
   {
+    "id": "AUDIT-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Preserve completed command outcomes when reported state makes a failed ACK fit but an executed ACK does not (GitHub issue #8)",
+    "acceptance": [
+      "An oversized handler state does not turn a completed side effect into a failed ACK",
+      "The last valid state is retained and the bounded executed ACK is cached",
+      "Retry after a background state update invokes the handler once",
+      "Boundary and real gateway transport behavior are covered"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "in_progress",
+    "commits": [],
+    "evidence": [
+      "42 unit and gateway integration tests pass with GROK_GATEWAY_SOURCE at 6571af25db151d12f128fdde39778c81209f70b1; includes 1970-byte state/2008-byte state-frame reproduction and retry after state changes",
+      "uv sync --frozen, Ruff check/format, and uv build pass; local gateway transport reports executed and retains last valid state"
+    ],
+    "blocker": null
+  },
+  {
     "id": "REVIEW-LIN-003",
     "repository": "grok-gadgets-linux-sdk",
     "owner": "grok-gadgets-linux-sdk",

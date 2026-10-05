@@ -6,7 +6,12 @@ import unittest
 from importlib.resources import files
 
 from grok_gadgets_linux import Device, SDKError
-from grok_gadgets_linux.contracts import REQUEST_VALIDATOR, SOURCE, validate_request
+from grok_gadgets_linux.contracts import (
+    REQUEST_VALIDATOR,
+    SOURCE,
+    validate_request,
+    worst_case_ack,
+)
 
 
 class DeviceTests(unittest.IsolatedAsyncioTestCase):
@@ -92,15 +97,33 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(conflict["error"]["code"], "duplicate_conflict")
         self.assertLessEqual(len(validate_request(conflict)), 2048)
 
-    async def test_oversized_handler_state_fails_without_raising(self):
+    async def test_oversized_handler_state_is_executed_and_deduplicated(self):
+        calls = []
+
         async def handler(arguments):
+            calls.append(1)
             return {"blob": "x" * 1990}
 
         device = self.device(state={"ok": 1}).capability("big", handler)
-        ack = await device.execute({"command_id": "c1", "capability": "big", "arguments": {}})
-        self.assertEqual(ack["error"]["code"], "handler_failed")
+        command = {"command_id": "c1", "capability": "big", "arguments": {}}
+        ack = await device.execute(command)
+        self.assertEqual(ack["status"], "executed")
+        self.assertNotIn("error", ack)
         self.assertEqual(ack["state"], {"ok": 1})
-        self.assertEqual(device.results["c1"][1], "handler_failed")
+        self.assertEqual(device.results["c1"][1], None)
+        self.assertLessEqual(len(validate_request(ack)), 2048)
+        self.assertGreater(
+            len(validate_request({"type": "state", "state": {"blob": "x" * 1990}})),
+            2000,
+        )
+        with self.assertRaises(SDKError) as oversized_failure:
+            validate_request(worst_case_ack({"blob": "x" * 1990}, "c1"))
+        self.assertEqual(oversized_failure.exception.code, "frame_too_large")
+        device.publish_state({"ok": 2})
+        replay = await device.execute(command)
+        self.assertEqual(replay["status"], "executed")
+        self.assertEqual(replay["state"], {"ok": 2})
+        self.assertEqual(len(calls), 1)
 
     def test_custom_events_are_annotated_and_reserved_names_guarded(self):
         async def handler(arguments):
