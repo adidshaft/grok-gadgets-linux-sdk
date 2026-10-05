@@ -207,5 +207,114 @@
       "2026-10-05: uv sync --frozen, Ruff check/format, and uv build passed. Unittest discovery passed 15 tests; 5 optional gateway-source integrations skipped. git diff --check passed."
     ],
     "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A reused command ID with changed arguments stops the agent; replays report stale state (review LIN-02, LIN-09)",
+    "acceptance": [
+      "A fingerprint conflict on a cached command_id answers a failed ACK with error code duplicate_conflict and a fixed message, runs no handler, and keeps the session",
+      "Cache hits return the cached status and error code with the current state, validated against the frame limit",
+      "Gateway-restart integration test reuses an ID with changed arguments and with identical arguments"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P0"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "tests/test_agent.py (GatewayIntegrationTests restart cases)",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-002",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A failed ACK can exceed the frame limit after a handler ran; nested JSON escapes Agent.run (review LIN-11 extends AUDIT-LIN-001 / issue #8; LIN-15)",
+    "acceptance": [
+      "State is limited so the largest failed ACK (64-character ID, longest fixed error) fits 2048 bytes",
+      "The worst-case ACK is pre-validated before any handler runs",
+      "RecursionError while decoding a reply becomes SDKError('invalid_response')"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/contracts.py",
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_device.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-003",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Custom event names are advertised to MCP clients as callable commands (review LIN-07)",
+    "acceptance": [
+      "event_capability(name) sends the inline schema {type: object, x-grok-gadgets-kind: event} for custom names",
+      "button stays the built-in event; history_lost is reserved; neither can be a command",
+      "Hello stays within 2048 bytes for 15 custom events",
+      "Gateway honouring the annotation is owned by the gateway repository and must be verified by the coordinator"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P2"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-004",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Synchronous handlers block the event loop and bypass handler_timeout (review LIN-08)",
+    "acceptance": [
+      "Plain-function handlers run in a worker thread automatically; async handlers are unchanged",
+      "The timeout bounds the await; a timed-out thread may continue, and the next blocking handler waits for it",
+      "docs/development.md documents this with a GPIO-style example"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P2"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/device.py",
+      "tests/test_device.py",
+      "docs/development.md",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
   }
 ]
