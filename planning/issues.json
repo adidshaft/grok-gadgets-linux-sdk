@@ -177,5 +177,35 @@
       "Local YAML/pin/permission validation; runtime unchanged from fresh standalone docs acceptance"
     ],
     "blocker": null
+  },
+  {
+    "id": "HOSTING-DOCS-LIN-001",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Explain hosting ownership and current remote connection limits",
+    "acceptance": [
+      "Relevant entry points link the canonical hub hosting FAQ",
+      "Local software use needs no public hosting; gateway remote HTTPS/OAuth MCP remains unimplemented",
+      "Tunnel reachability is distinct from authentication, native Grok invocation, and physical evidence",
+      "Agent or USB bridge shares the local gateway host; device transport must not be exposed",
+      "Product hosting options remain proposals; no service or tunnel is activated"
+    ],
+    "dependencies": [],
+    "labels": [
+      "docs",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "README.md",
+      "docs/development.md",
+      "docs/operation.md",
+      "Documentation only. Runtime, protocol and workflows unchanged. HARD-GROK-REMOTE-001 remains an unimplemented engineering gate; no tunnel or service activated.",
+      "2026-10-05: uv sync --frozen, Ruff check/format, and uv build passed. Unittest discovery passed 15 tests; 5 optional gateway-source integrations skipped. git diff --check passed."
+    ],
+    "blocker": null
   }
 ]

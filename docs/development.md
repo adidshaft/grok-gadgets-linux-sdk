@@ -4,6 +4,12 @@ Use Python 3.11 or later. Install the source with `uv sync --frozen`, or install
 
 The SDK implements your device. The gateway provides the tools for Grok. The SDK does not call a model or backend.
 
+Develop and simulate on one host without public hosting. The agent connects to the gateway's
+authenticated loopback device port. Local MCP clients use stdio. These are different interfaces.
+The gateway has no remote HTTPS or OAuth MCP service. Do not expose the device port through a tunnel.
+See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
+for gateway ownership, the `HARD-GROK-REMOTE-001` gate, and future product options.
+
 ## Create a device
 
 Create a trusted file with a factory function that returns a `Device`. Save this example as `my_gadget.py`:
