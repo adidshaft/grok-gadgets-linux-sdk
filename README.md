@@ -1,10 +1,9 @@
 # Grok Gadgets Linux SDK
 
-Turn a Linux computer or Raspberry Pi into a gadget that Grok can use. You write small
-Python functions, such as "turn the lamp on". This SDK's agent connects them to the
-[Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway) on the same
-computer, and the gateway offers them to an AI assistant as MCP tools. It is an
-experimental alpha.
+Build gadgets for your existing **Grok Bot** with Python functions. The SDK connects
+your functions to the [gateway](https://github.com/adidshaft/grok-gadgets-gateway)
+on the same computer. Start with a software lamp, then add your peripheral code.
+Experimental alpha; the actual Grok Bot connection is not verified.
 
 ## What works with Grok Bot today
 
@@ -19,20 +18,20 @@ experimental alpha.
 
 ## Quickstart
 
-**1. Install.** Packages are not published yet. Build the wheels (`uv build` in this
-repository and in the gateway repository), then install both into one environment:
+**1. Install from source.** Use Git and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Packages are not published yet. Clone the two repositories side by side:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl grok_gadgets_gateway-0.1.0a1-py3-none-any.whl
+git clone https://github.com/adidshaft/grok-gadgets-gateway.git
+git clone https://github.com/adidshaft/grok-gadgets-linux-sdk.git
+cd grok-gadgets-linux-sdk
+uv venv --python 3.11 .venv
+uv pip install --python .venv/bin/python . ../grok-gadgets-gateway
 ```
 
-**2. Get a token and start the gateway.** Run `.venv/bin/grok-gadgets-gateway enroll my-pi`.
-It prints `GROK_GADGETS_DEVICE_TOKEN=...`. Set that variable privately in the agent's
-terminal. Start the gateway in another terminal with `.venv/bin/grok-gadgets-gateway serve`.
-These two commands belong to the gateway; see its README for options.
+If you already have both checkouts, run only the last two commands from this SDK's root.
 
-**3. Run your gadget.** Save this as `my_gadget.py`:
+**2. Define your gadget.** Save this as `my_gadget.py` in this SDK's root:
 
 ```python
 from grok_gadgets_linux import Device
@@ -49,14 +48,29 @@ def create():
     return device
 ```
 
-Then start the agent:
+**3. Start the gateway and agent.** In the first terminal, from this SDK's root:
 
 ```sh
+.venv/bin/grok-gadgets-gateway init
+.venv/bin/grok-gadgets-gateway serve
+```
+
+Keep that terminal open. In a second terminal, change to the same SDK directory and run:
+
+```sh
+export "$(.venv/bin/grok-gadgets-gateway enroll my-pi)"
 .venv/bin/grok-linux-agent --factory-file ./my_gadget.py:create
 ```
 
-The gateway now lists `my-pi` with a `lamp.set` command. Set `simulated=False` only
-when your handler really controls hardware.
+The `export` command stores the new device token in this shell without displaying it.
+Enroll once; on later runs, load the saved token privately. `init` creates the separate
+MCP bearer token needed by `serve`. Neither token is a Grok account password.
+
+The agent prints `Agent starting; software simulation`. A local MCP client can now
+list `my-pi` and call `lamp.set` through `http://127.0.0.1:8766/mcp`, using the HTTP
+settings printed by `init`. See [client setup](docs/operation.md#connect-a-local-mcp-client).
+The gateway reports software state; no physical lamp changes. Set `simulated=False`
+only when your handler controls hardware. Button events do not wake Grok Bot.
 
 ## Details
 
@@ -110,7 +124,7 @@ No Raspberry Pi was used to test this SDK.
 | macOS arm64, CPython 3.11.15, 3.12.13, 3.13.15, 3.14.7 | Unit, CLI, shipped-unit `ExecStart` (no systemd) and gateway-source integration tests, 5 October 2026 | Not Linux |
 | Linux aarch64 container, CPython 3.11.17 | Linux container software acceptance (partial): installed-wheel tests with gateway integration, 5 October 2026 | A non-container Linux host; other distributions; real service and peripherals |
 | Windows / Intel Mac | Not verified | Installation and runtime checks |
-| Grok / mobile | Not verified | Supported route to the gateway |
+| Grok Bot / mobile | Not verified | Supported route to the gateway |
 | systemd / peripherals | Template and APIs supplied; not operated | Authorized host and peripheral observations |
 
 [Launch verification](docs/verification/launch-docs.md) and the
@@ -124,7 +138,7 @@ The agent prints `Agent stopped (<code>). <hint>` and exits with a distinct code
 | Exit | Meaning | Next step |
 | --- | --- | --- |
 | 2 | Configuration (`token_missing`, `factory_error`, ...) | Set `GROK_GADGETS_DEVICE_TOKEN`; use `--factory-file ./my_gadget.py:create` and install its dependencies |
-| 3 | `unauthorized` or `revoked` | Enroll the device again; never paste the token in issue logs |
+| 3 | `unauthorized` or `revoked` | Check the device ID and token; see [token recovery](docs/operation.md#recover-a-device-token) |
 | 4 | Protocol contract, for example `frame_too_large` | Shorten schemas, descriptions or state (2048-byte frames) |
 | 5 | `reconnect_exhausted` | Start the gateway, or use `--retry-forever` |
 
@@ -142,7 +156,7 @@ or account captures.
 
 Original code and copied protocol artifacts are [Apache-2.0](LICENSE).
 Retain [NOTICE](NOTICE) and dependency licenses. This independent project is exclusively
-for Grok and is not affiliated with xAI.
+for Grok Bot and is not affiliated with xAI.
 
 ### History note
 

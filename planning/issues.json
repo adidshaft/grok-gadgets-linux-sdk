@@ -460,7 +460,8 @@
       "planning/linux-evidence.json",
       "SECURITY.md",
       "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)",
-      "2026-10-05: Linux container software acceptance (partial) rerun, 41 tests passed; fresh-wheel onboarding passed on macOS"
+      "2026-10-05: Linux container software acceptance (partial) rerun, 41 tests passed; fresh-wheel onboarding passed on macOS",
+      "2026-10-05 developer follow-up: corrected source installation, init before serve, token recovery and HTTP client setup. Frozen sync, Ruff lint/format, 41 tests including seven sibling-gateway cases and wheel/sdist passed. A fresh source install ran the exact README factory through init/enroll/serve, authenticated HTTP MCP discovery, lamp.set and state read; SIGTERM exited cleanly and logs contained no credentials. Software simulation on macOS, not Linux hardware or Grok Bot verification."
     ],
     "blocker": null
   },

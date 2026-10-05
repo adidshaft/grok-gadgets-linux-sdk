@@ -86,7 +86,10 @@ _HINTS = {
         EXIT_AUTH,
         "Gateway rejected the device ID or token; enroll the device and set its token.",
     ),
-    "revoked": (EXIT_AUTH, "Gateway revoked this device; enroll it again for a new token."),
+    "revoked": (
+        EXIT_AUTH,
+        "Gateway revoked this device; enroll a new device ID and update the factory and token.",
+    ),
     "protocol_mismatch": (EXIT_CONTRACT, "Gateway uses another protocol version; update both."),
     "invalid_request": (
         EXIT_CONTRACT,
