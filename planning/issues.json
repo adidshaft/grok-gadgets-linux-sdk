@@ -471,7 +471,7 @@
     "owner": "grok-gadgets-linux-sdk",
     "problem": "Vendored protocol 0.1.0 lagged gateway event classification and ID anchors",
     "acceptance": [
-      "Copied protocol files match gateway b5f316e hashes",
+      "Copied protocol files match gateway 135dbb8 hashes",
       "test_pinned_fixtures_validate_and_match_hashes passes"
     ],
     "dependencies": [
