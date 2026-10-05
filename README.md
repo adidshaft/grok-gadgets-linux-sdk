@@ -11,7 +11,7 @@ flowchart LR
     A["Your capability handler"] --> S["SDK library + agent"]
     S <-->|"Loopback register / poll / ACK"| G["Gateway"]
     C["Local MCP client"] -->|"stdio"| G
-    B["Cloud Grok Bot"] -.-> R["Remote HTTPS MCP: not implemented"]
+    B["Cloud Grok Bot"] -.-> R["Remote MCP: missing"]
     R -.-> G
 ```
 
