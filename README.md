@@ -10,12 +10,21 @@ Documentation uses an [ASD-STE100-inspired writing guide](https://github.com/adi
 flowchart LR
     A["Your capability handler"] --> S["SDK library + agent"]
     S <-->|"Loopback register / poll / ACK"| G["Gateway"]
-    C["Local MCP client"] --> G
-    B["Grok Bot: invocation evidence pending"] -.-> G
+    C["Local MCP client"] -->|"stdio"| G
+    B["Cloud Grok Bot"] -.-> R["Remote HTTPS MCP: not implemented"]
+    R -.-> G
 ```
 
 The SDK implements a device application; the gateway routes assistant requests. They are
 separate packages. The software example reports state without operating a physical device.
+Run the agent and gateway on the same computer or Linux host. Local development needs no public hosting.
+
+The builder runs the gateway. Grok/xAI hosts Grok Bot. The gateway has local stdio MCP
+and an authenticated loopback device port. It has no remote HTTPS or OAuth MCP service.
+Do not expose its device port through a tunnel. Remote access needs separate engineering
+work under `HARD-GROK-REMOTE-001`.
+See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
+for tunnel ownership, required access controls, and proposed customer-hosted or maker-hosted options.
 
 ## Choose a first step
 
@@ -96,7 +105,8 @@ The [gateway](https://github.com/adidshaft/grok-gadgets-gateway) owns assistant 
 canonical contracts; the [hub](https://github.com/adidshaft/grok-gadgets) owns shared
 architecture, roadmap, and policies. The SDK's own unit checks require no sibling checkout.
 
-The agent accepts only loopback TCP. A cloud Bot cannot execute your local file path. This SDK does not provide an authenticated remote route.
+The agent accepts only loopback TCP. A cloud Bot cannot execute your local file path.
+Cloud access needs a publicly reachable, authenticated HTTPS MCP route. This SDK does not provide that route.
 
 Command and event caches have limits and exist only in memory. Never use a new ID to retry an uncertain physical action. An oversized acknowledgement can also bypass result caching; see [issue 8](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/8). Read [operation](docs/operation.md) and [security](SECURITY.md) before you connect hardware.
 
