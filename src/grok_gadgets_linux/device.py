@@ -228,6 +228,13 @@ class Device:
             try:
                 reported = await self._call(self.handlers[capability], copy.deepcopy(arguments))
                 self.publish_state(reported)
+            except SDKError as exc:
+                if exc.code == "frame_too_large":
+                    # The side effect already completed. Keep the last-known-good state
+                    # and report execution; marking this failed would invite a retry.
+                    pass
+                else:
+                    error = "handler_failed"
             except Exception:
                 # Handler errors may include credentials: return only a fixed failure.
                 error = "handler_failed"
