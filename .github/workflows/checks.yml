@@ -6,7 +6,8 @@ concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  linux-sdk-checks:
+  linux-sdk-checks-matrix:
+    name: linux-sdk-checks (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -26,3 +27,13 @@ jobs:
       - run: uv run python -m unittest discover -s tests -v
         timeout-minutes: 5
       - run: uv build
+  linux-sdk-checks:
+    name: linux-sdk-checks
+    if: always()
+    needs: linux-sdk-checks-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every Python version
+        env:
+          MATRIX_RESULT: ${{ needs.linux-sdk-checks-matrix.result }}
+        run: test "$MATRIX_RESULT" = success
