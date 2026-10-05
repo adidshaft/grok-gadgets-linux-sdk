@@ -402,5 +402,32 @@
       "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
     ],
     "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-008",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "CI runs only Python 3.11 and integration hangs never fail (review LIN-01, SDK side)",
+    "acceptance": [
+      "checks.yml runs the frozen check sequence on Python 3.11, 3.12, 3.13 and 3.14 with pinned actions, read-only permissions and timeouts",
+      "Every gateway integration test and its teardown have a bounded timeout so a hang becomes a failure",
+      "Hosted CI execution remains unverified until the owner pushes"
+    ],
+    "dependencies": [],
+    "labels": [
+      "maintenance",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      ".github/workflows/checks.yml",
+      "tests/fake_gateway.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
   }
 ]
