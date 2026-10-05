@@ -5,6 +5,7 @@ import asyncio
 import importlib
 import importlib.util
 import os
+import signal
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -66,8 +67,95 @@ def load_factory(factory, *, file=False):
     return device
 
 
+TOKEN_ENV = "GROK_GADGETS_DEVICE_TOKEN"
+LEGACY_TOKEN_ENV = "GROK_DEVICE_TOKEN"
+
+EXIT_OK, EXIT_INTERNAL, EXIT_CONFIG, EXIT_AUTH, EXIT_CONTRACT, EXIT_RECONNECT = range(6)
+
+# Fixed public hints; codes are fixed SDK strings and never carry secrets or remote text.
+_HINTS = {
+    "token_missing": (
+        EXIT_CONFIG,
+        f"Set {TOKEN_ENV} privately; get one with grok-gadgets-gateway enroll <device-id>.",
+    ),
+    "token_invalid": (EXIT_CONFIG, "The device token must have 16 to 256 characters."),
+    "factory_error": (EXIT_CONFIG, "Factory could not load."),
+    "invalid_option": (EXIT_CONFIG, "Check --port and --max-attempts values."),
+    "simulation_only": (EXIT_CONFIG, "--simulate-button needs a simulated device."),
+    "unauthorized": (
+        EXIT_AUTH,
+        "Gateway rejected the device ID or token; enroll the device and set its token.",
+    ),
+    "revoked": (EXIT_AUTH, "Gateway revoked this device; enroll it again for a new token."),
+    "protocol_mismatch": (EXIT_CONTRACT, "Gateway uses another protocol version; update both."),
+    "invalid_request": (
+        EXIT_CONTRACT,
+        "A message violates protocol 0.1.0; check capability names, schemas and state.",
+    ),
+    "invalid_response": (
+        EXIT_CONTRACT,
+        "Malformed gateway reply; check that a Grok Gadgets gateway owns this port.",
+    ),
+    "frame_too_large": (
+        EXIT_CONTRACT,
+        "A message exceeds 2048 bytes; shorten schemas, descriptions or state.",
+    ),
+    "duplicate_conflict": (
+        EXIT_CONTRACT,
+        "Gateway reported a changed acknowledgement or event; report this defect.",
+    ),
+    "reconnect_exhausted": (
+        EXIT_RECONNECT,
+        "No gateway answered; start grok-gadgets-gateway serve or use --retry-forever.",
+    ),
+}
+
+
+def _token():
+    token = os.environ.get(TOKEN_ENV)
+    if token is None and LEGACY_TOKEN_ENV in os.environ:
+        print(f"{LEGACY_TOKEN_ENV} is deprecated; use {TOKEN_ENV}.", file=sys.stderr)
+        token = os.environ[LEGACY_TOKEN_ENV]
+    if not token:
+        raise SDKError("token_missing")
+    if not 16 <= len(token) <= 256:
+        raise SDKError("token_invalid")
+    return token
+
+
+def _stopped(code, hint=None):
+    status, default = _HINTS.get(code, (EXIT_INTERNAL, "Inspect redacted diagnostics privately."))
+    print(f"Agent stopped ({code}). {hint or default}", file=sys.stderr)
+    return status
+
+
+async def _serve(agent):
+    stop = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    installed = []
+    for name in ("SIGTERM", "SIGINT"):
+        number = getattr(signal, name, None)
+        try:
+            loop.add_signal_handler(number, stop.set)
+            installed.append(number)
+        except (NotImplementedError, RuntimeError, TypeError, ValueError):
+            pass  # Unsupported platform: SIGINT still raises KeyboardInterrupt.
+    try:
+        await agent.run(stop)
+    finally:
+        for number in installed:
+            loop.remove_signal_handler(number)
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=(
+            f"Token: {TOKEN_ENV} ({LEGACY_TOKEN_ENV} is a deprecated fallback). Exit codes: "
+            "0 stopped by signal, 1 internal, 2 configuration, 3 unauthorized or revoked, "
+            "4 protocol contract, 5 reconnect attempts exhausted."
+        ),
+    )
     factories = parser.add_mutually_exclusive_group()
     factories.add_argument(
         "--factory",
@@ -83,6 +171,18 @@ def main():
         action="store_true",
         help="Explicitly inject press/release into the simulated example",
     )
+    retries = parser.add_mutually_exclusive_group()
+    retries.add_argument(
+        "--max-attempts",
+        type=int,
+        default=8,
+        help="Consecutive failed connection attempts before exit code 5 (1..32, default 8)",
+    )
+    retries.add_argument(
+        "--retry-forever",
+        action="store_true",
+        help="Service mode: never give up reconnecting; backoff ceiling 30 seconds",
+    )
     args = parser.parse_args()
     try:
         device = load_factory(
@@ -94,23 +194,32 @@ def main():
                 raise SDKError("simulation_only")
             device.emit("button", {"pressed": True})
             device.emit("button", {"pressed": False})
-        agent = Agent(device, os.environ.get("GROK_DEVICE_TOKEN", ""), port=args.port)
+        token = _token()
+        try:
+            agent = Agent(
+                device,
+                token,
+                port=args.port,
+                reconnect_attempts=None if args.retry_forever else args.max_attempts,
+                backoff_cap=30.0 if args.retry_forever else 5.0,
+            )
+        except ValueError:
+            raise SDKError("invalid_option") from None
         print(
             "Agent starting; software simulation"
             if device.simulated
             else "Agent starting; physical effects require observation",
             file=sys.stderr,
+            flush=True,
         )
-        asyncio.run(agent.run())
+        asyncio.run(_serve(agent))
     except FactoryError as error:
-        print(f"Agent stopped. {error}", file=sys.stderr)
-        return 1
+        return _stopped("factory_error", str(error))
+    except SDKError as error:
+        return _stopped(error.code)
     except KeyboardInterrupt:
-        return 0
+        return EXIT_OK
     except Exception:
-        print(
-            "Agent stopped. Check credentials, factory, endpoint and redacted diagnostics privately.",
-            file=sys.stderr,
-        )
-        return 1
-    return 0
+        return _stopped("internal_error")
+    print("Agent stopped (signal). Handlers were cancelled; shutdown hooks ran.", file=sys.stderr)
+    return EXIT_OK

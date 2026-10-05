@@ -45,7 +45,8 @@ async def check(document, *, dataclass=False):
         credentials.chmod(0o600)
         gateway = Gateway()
         server = await DeviceServer(gateway, Credentials(credentials), port=0).start()
-        environment = dict(os.environ, GROK_DEVICE_TOKEN=token)
+        environment = dict(os.environ, GROK_GADGETS_DEVICE_TOKEN=token)
+        environment.pop("GROK_DEVICE_TOKEN", None)
         environment.pop("PYTHONPATH", None)
         executable = Path(sys.executable).parent / "grok-linux-agent"
         process = await asyncio.create_subprocess_exec(

@@ -5,23 +5,52 @@ The agent connects only to loopback TCP: `127.0.0.1` or `::1`. The default port 
 Local simulation needs no public hosting. You operate the gateway and agent on this host.
 Grok/xAI hosts Grok Bot; it does not host these processes for you.
 
-The gateway exposes local stdio MCP and an authenticated loopback device port.
-It has no remote HTTPS or OAuth MCP service. Do not tunnel the device port.
-A tunnel adds reachability. It does not add gateway authentication.
-`HARD-GROK-REMOTE-001` tracks the missing remote service and security work.
+The gateway has local stdio MCP and an authenticated loopback device port. The gateway
+repository is adding a long-running `grok-gadgets-gateway serve` mode; see the gateway
+README for its status and flags. Never tunnel the device port.
+A tunnel adds reachability. It does not add authentication.
+`HARD-GROK-REMOTE-001` tracks the remote route.
 See the [hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
 for the future cloud route and product hosting choices.
 
 ## Start the agent
 
 1. Install the gateway. Follow its README.
-2. Authorize a per-device token in the gateway credential file. Set file permissions to `600`. The default software device ID is `linux-lamp-1`.
-3. Start the gateway listener through an initialized MCP client or the local demo. A stdio process alone does not start the listener.
-4. Set `GROK_DEVICE_TOKEN` privately to the same token.
+2. Get a per-device token: `grok-gadgets-gateway enroll linux-lamp-1`. It prints
+   `GROK_GADGETS_DEVICE_TOKEN=...`. The gateway owns this command; see its README for
+   the credential-file option. The default software device ID is `linux-lamp-1`.
+3. Start the gateway so that its device listener runs: either `grok-gadgets-gateway serve`,
+   or an MCP client that starts the gateway with `--credentials` (see below). A gateway
+   started without a credential file has no device listener.
+4. Set `GROK_GADGETS_DEVICE_TOKEN` privately to the token. `GROK_DEVICE_TOKEN` still
+   works but is deprecated.
 5. Run `uv run grok-linux-agent`.
 6. Request device capabilities through gateway MCP.
 
-The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
+The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory-file ./my_gadget.py:create` or `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
+
+### Connect a local MCP client
+
+A local MCP client (one that runs commands on this computer) starts the gateway over
+stdio. Use absolute paths. The listener on `--device-port` runs while the client keeps
+the gateway running:
+
+```json
+{
+  "mcpServers": {
+    "grok-gadgets": {
+      "command": "/home/pi/grok-gadget/.venv/bin/grok-gadgets-gateway",
+      "args": [
+        "--credentials", "/home/pi/.config/grok-gadgets/credentials.json",
+        "--device-port", "8765"
+      ]
+    }
+  }
+}
+```
+
+The credential file must have mode `600`. A cloud Grok Bot cannot start this command on
+your computer. This snippet is not verified with a specific MCP client.
 
 SDK integration tests start `DeviceServer` directly on temporary loopback ports. They do not use a paid API call or a live Grok account.
 
@@ -36,15 +65,40 @@ A command can be accepted without a confirmed result. A reported result does not
 | Poll interval | 100 ms |
 | Socket timeout | 2 seconds |
 | Handler timeout | 5 seconds |
-| Failed connection or session attempts | At most 8 |
-| Reconnect delay | Starts at 250 ms; doubles up to 5 seconds |
+| Failed connection or session attempts | 8 (`--max-attempts N`, 1–32); unlimited with `--retry-forever` |
+| Reconnect delay | Ceiling starts at 250 ms and doubles to 5 seconds (30 seconds with `--retry-forever`); each delay is random between half the ceiling and the ceiling |
 | Healthy session needed to reset the failure budget | 10 seconds |
 
-Authorization, revocation and contract errors stop the agent immediately. Each request rechecks gateway revocation. Exhausted reconnect attempts produce a fixed diagnostic. Shutdown interrupts a reconnect delay.
+Revocation and contract errors stop the agent immediately. `unauthorized` before the
+first successful hello stops it immediately. After a successful hello in the same run,
+one `unauthorized` is retried with backoff, because a gateway can report a transient
+credential-file read failure that way; a second consecutive `unauthorized` stops the
+agent. `unavailable`, `busy` and connection failures are retried. Each request rechecks
+gateway revocation. Shutdown interrupts a reconnect delay.
 
 A lost event acknowledgement retains the event ID for reconnect. The gateway does not replay a dispatched command into a new session. A handler timeout produces no success acknowledgement. On disconnect, the gateway marks that command unconfirmed.
 
-Handlers must respond to cancellation. Do not detach physical actions from a handler.
+Async handlers must respond to cancellation. A plain-function handler runs in a worker
+thread: the timeout stops the wait, not the thread. Do not detach physical actions from a handler.
+
+## Stop and exit codes
+
+SIGTERM (`systemctl stop`) and Ctrl-C stop the agent the same way: it cancels the running
+handler, so its `finally` blocks run, then it calls `Device.on_shutdown` callbacks, then
+it exits with code 0. A plain-function handler that is still running delays exit until it
+returns.
+
+Every other stop prints `Agent stopped (<code>). <hint>`. The code is a fixed string; it
+never contains tokens, arguments or gateway text.
+
+| Exit | Codes | Meaning |
+| --- | --- | --- |
+| 0 | `signal` | Stopped by SIGTERM or SIGINT |
+| 1 | `internal_error` | Unexpected failure; inspect it privately |
+| 2 | `factory_error`, `token_missing`, `token_invalid`, `invalid_option`, `simulation_only` | Configuration; argparse usage errors also exit 2 |
+| 3 | `unauthorized`, `revoked` | Enroll the device again and set its new token |
+| 4 | `protocol_mismatch`, `invalid_request`, `invalid_response`, `frame_too_large`, `duplicate_conflict` | Protocol contract; for example, a hello larger than 2048 bytes |
+| 5 | `reconnect_exhausted` | No gateway answered within the attempt budget |
 
 ## State and restart behavior
 
@@ -52,17 +106,36 @@ Each poll reports stored state. This refreshes gateway receipt time; it does not
 
 The boot ID stays the same during reconnects within one process. Restart creates a new boot ID. The event queue and command cache exist only in memory. Gateway restart removes its history and changes its cursor epoch.
 
+After a gateway restart, the gateway can send a command ID that the device already
+executed. The same arguments return the cached status with current state. Changed
+arguments return a failed acknowledgement with `duplicate_conflict`; the agent stays
+connected.
+
 ## Prepare a Linux user service
 
-The template is `examples/grok-gadget.service`. Real user-service operation and physical peripherals remain untested.
+The template is `examples/grok-gadget.service`. It is not yet verified under real systemd.
+A test runs its `ExecStart` line from a temporary home folder without systemd.
 
-1. Copy the template and set the virtual environment and factory paths.
-2. Set environment-file permissions to `600`.
+The template expects:
+
+- `~/grok-gadget/.venv` with this SDK installed;
+- `~/grok-gadget/my_gadget.py` with a `create()` function;
+- `~/.config/grok-gadgets/linux-agent.env` with `GROK_GADGETS_DEVICE_TOKEN=...`, mode `600`.
+
+Steps:
+
+1. Copy the template to `~/.config/systemd/user/grok-gadget.service`. Change paths if necessary.
+2. Run `chmod 600 ~/.config/grok-gadgets/linux-agent.env`.
 3. Run `systemctl --user daemon-reload`.
-4. Run `systemctl --user start grok-gadget`.
-5. Check manual operation before you enable automatic startup.
+4. Run `systemctl --user start grok-gadget`, then check `journalctl --user -u grok-gadget`.
+5. To start at boot without a login session, run `loginctl enable-linger "$USER"`.
+6. Run `systemctl --user enable grok-gadget` after manual operation works.
 
-Automatic restart is disabled to preserve the retry limit. Diagnose a failure before restart. Replace revoked credentials when necessary.
+The template uses `--retry-forever`, so the agent waits for a gateway that starts later.
+`Restart=on-failure` with `RestartSec=5` restarts it after other failures.
+`RestartPreventExitStatus=2 3 4` keeps it stopped after configuration, authorization
+and contract errors; fix the cause, then start it again. A user unit cannot order itself
+after a system network target, so the template has no `After=network.target`.
 
 ## Remove the test setup
 
@@ -80,4 +153,4 @@ Use the reviewed gateway source checkout:
 GROK_GATEWAY_SOURCE=../grok-gadgets-gateway/src uv run python -m unittest discover -s tests -v
 ```
 
-Without this variable, five integration tests skip. Unit tests still run independently. Component CI runs unit checks. Cross-repository checks must supply the pinned gateway source.
+Without this variable, seven integration tests skip. Unit tests still run independently. Each integration test has a time limit, so a hang is reported as a failure. Component CI runs unit checks. Cross-repository checks must supply the pinned gateway source.

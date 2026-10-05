@@ -362,7 +362,8 @@ class GatewayIntegrationTests(unittest.IsolatedAsyncioTestCase):
             json.dumps({"devices": {"linux-lamp-1": {"token": TOKEN, "revoked": False}}})
         )
         self.path.chmod(0o600)
-        environment = dict(os.environ, GROK_DEVICE_TOKEN=TOKEN)
+        environment = dict(os.environ, GROK_GADGETS_DEVICE_TOKEN=TOKEN)
+        environment.pop("GROK_DEVICE_TOKEN", None)
         process = await asyncio.create_subprocess_exec(
             str(Path(sys.executable).parent / "grok-linux-agent"),
             "--port",
