@@ -148,6 +148,11 @@ gateway integration tests skip; see [CONTRIBUTING](CONTRIBUTING.md).
 Command and event caches are limited and exist only in memory. Never use a new command
 ID to retry an uncertain physical action.
 
+When a handler completes but its reported state is too large for a valid ACK, the agent
+keeps the last valid state and acknowledges the command as executed to prevent a retry
+from repeating the side effect. See [issue #8](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/8)
+for the regression and transport acceptance record.
+
 ### Help and license
 
 Use [SUPPORT](SUPPORT.md), [SECURITY](SECURITY.md), and
