@@ -1,20 +1,16 @@
 # Contributing to the Linux SDK
 
-Improve the library, agent, examples, tests, or documentation without hardware.
-Device handlers belong here; canonical protocol and MCP routing belong in the gateway.
-Discuss substantial features, interfaces, and protocol changes first. Small typo fixes
-need no issue ceremony.
+Contribute to the library, agent, examples, tests or documentation without hardware. Device handlers belong here. The gateway owns the canonical protocol and MCP routing.
+
+Discuss large features, interface changes and protocol changes before implementation. Submit small typo fixes directly. Use the [writing guide](https://github.com/adidshaft/grok-gadgets/blob/main/docs/contributing/writing-guide.md) for documentation.
 
 The hub owns [shared contribution policy](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md),
 [governance](https://github.com/adidshaft/grok-gadgets/blob/main/GOVERNANCE.md), and
-[roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md). These links are
-planned destinations until publication. Use the supplied source and [local issues](planning/issues.json)
-during preparation.
+[roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md). Use [GitHub Issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues) to track current work. The [local issue ledger](planning/issues.json) records preparation work.
 
 ## Standalone checks
 
-Use Python 3.11+ and uv. After publication, fork/clone this component; a supplied local
-source tree works now. From the SDK root:
+Use Python 3.11 or later and uv. Fork the repository and clone your fork. From the SDK root, run:
 
 ```sh
 git switch -c docs/clearer-device-example
@@ -25,9 +21,9 @@ uv run python -m unittest discover -s tests -v
 uv build
 ```
 
-These checks require no sibling checkout. Five optional gateway integration cases skip
-without `GROK_GATEWAY_SOURCE`; that is explicit scope, not full integration acceptance.
-When coordinating a runtime/protocol change, point to a reviewed gateway source checkout:
+These checks need no sibling checkout. Without `GROK_GATEWAY_SOURCE`, five gateway integration tests skip. This result does not prove full integration.
+
+For runtime or protocol changes, use a reviewed gateway source checkout:
 
 ```sh
 GROK_GATEWAY_SOURCE=/absolute/path/grok-gadgets-gateway/src uv run python -m unittest discover -s tests -v
@@ -44,11 +40,9 @@ their own authorized Linux/hardware observations.
 
 ## Review and credit
 
-Keep small tested commits and a short branch from main. Link the public issue after
-migration or the stable local ID now. Explain before/after behavior and add a focused
-functional regression when needed. Provide exact commands, results, runtime, and evidence
-level; update user guidance. Respond to review, resolve conflicts on your branch, and rerun
-affected checks.
+Use a short branch from `main`. Make small tested commits and link the public issue. Explain the behavior before and after the change. Add a regression test when necessary.
+
+Record commands, results, runtime and evidence level. Update user guidance. Respond to review and resolve conflicts on your branch. Then repeat affected checks.
 
 Handlers must validate arguments and report observed state. Preserve retry, reconnect,
 bounded retention, and safe-error behavior. Protocol changes start upstream and require
@@ -63,4 +57,6 @@ See [support](SUPPORT.md), [conduct](CODE_OF_CONDUCT.md), [security](SECURITY.md
 
 ## Ignore rules and publication privacy
 
-Keep `.gitignore` current whenever a new tool produces caches, build output, local device configurations, execution logs or credentials. Preserve reviewed sample configuration files and the hub's verified public simulator download. Check new patterns with `git check-ignore`, then review the staged file list before committing. Ignore rules do not remove tracked files or past history; never merge the private pre-publication history back into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.
+Update `.gitignore` for new caches, build output, local device configuration, logs and credentials. Keep reviewed sample configuration and the hub’s public simulator download.
+
+Check new patterns with `git check-ignore`. Review staged files before each commit. Ignore rules do not remove tracked files or history. Never merge private pre-publication history into a public branch. Use the sanitized public checkout and a public or GitHub noreply commit email.

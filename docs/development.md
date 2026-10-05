@@ -1,8 +1,12 @@
 # Develop a gadget
 
-Python 3.11+; install this repository with `uv sync --frozen`, or its built wheel with pip into your own venv. This SDK has no model/backend dependency. The gateway hosts Grok tools; the SDK implements your device.
+Use Python 3.11 or later. Install the source with `uv sync --frozen`, or install a built wheel in a virtual environment.
 
-An explicitly selected trusted file exposes a factory returning `Device`. For example `my_gadget.py`:
+The SDK implements your device. The gateway provides the tools for Grok. The SDK does not call a model or backend.
+
+## Create a device
+
+Create a trusted file with a factory function that returns a `Device`. Save this example as `my_gadget.py`:
 
 ```python
 from grok_gadgets_linux import Device
@@ -23,25 +27,65 @@ def create():
     return device
 ```
 
-From a new directory outside the checkout, create a fresh environment and install the built wheel (replace `/absolute/path` with its actual location):
+## Install and start the agent
+
+1. Create a directory outside the checkout.
+2. Replace `/absolute/path` with the wheel location.
+3. Create an environment and install the wheel:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install /absolute/path/grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl
 ```
 
-Save the example above as `my_gadget.py`. With an authenticated local gateway already running on loopback port 8765 and `display-1` authorized in its credential file, set `GROK_DEVICE_TOKEN` privately and run:
+4. Save `my_gadget.py` in this directory.
+5. Start an authenticated gateway on loopback port 8765.
+6. Authorize `display-1` in the gateway credential file.
+7. Set `GROK_DEVICE_TOKEN` privately.
+8. Start the agent:
 
 ```sh
 .venv/bin/grok-linux-agent --factory-file ./my_gadget.py:create
 ```
 
-Use `--port PORT` when the local gateway uses another port. The file is explicitly executed as trusted local code. Its dependencies must be installed in this environment; sibling imports and relative package imports are not provided by this file route. For a packaged gadget install that package and use `--factory your_package.module:create`. Neither route adds the current directory or the file directory to `sys.path`; no `PYTHONPATH` or editable install is required. The default CLI still runs the built-in software lamp. Set `simulated=False` only for a real peripheral implementation and still record visible physical effects separately.
+Use `--port PORT` if the gateway uses a different port.
 
-Handlers are async and return a complete state object. SDK validates arguments against a declared inline Draft 2020-12 schema; `rgb.set` always uses canonical strict RGB channels/on schema. References are prohibited. Missing custom schema allows arbitrary JSON-object arguments, so provide one or explicitly validate in the handler. Returning invalid state reports failure. Exceptions become fixed errors with no raw exception text. Concurrent calls serialize, preventing duplicate handlers in the retained window.
+The agent executes the selected file as trusted local code. Install its dependencies in the same environment. This file route does not provide sibling imports or relative package imports.
 
-Use `device.publish_state({...})` for background observations. `device.emit("button", {"pressed": True})` queues an event; release is a second event. Event IDs are monotonic within the random boot ID. Queue cap defaults to 64 and raises `event_queue_full` instead of silently losing history; applications decide backpressure. Snapshot/queued values are copied to prevent mutations after validation. Do not invoke the example's injection controls as physical evidence.
+For a packaged gadget, install its package. Then use `--factory your_package.module:create`. Neither factory route adds a directory to `sys.path`. An editable install and `PYTHONPATH` are not necessary.
 
-Command dedup retains 128 results per process/boot. Same ID/arguments returns original acknowledgement; changed parameters conflict. Results can be evicted or lost on restart: not durable exactly-once delivery. Never create a new command ID to retry an uncertain physical action. Gateway separately prevents replay across disconnected sessions.
+Without a factory option, the CLI starts the software lamp. Use `simulated=False` only for an implementation that controls a real peripheral. Record physical observations separately.
 
-Copied protocol files are validated at import against [source manifest](../src/grok_gadgets_linux/protocol/source.json), pinned to gateway commit `aeabcaf46cca830894836ac5cb85f3a6d33cd63d`. Update them only by copying a reviewed canonical version and recording new hashes/source; do not hand-edit the SDK's schema copies. Canonical transcript is a contract fixture, not a hardware capture.
+## Write a handler
+
+Handlers are asynchronous. Each handler returns a complete state object.
+
+Declare an inline Draft 2020-12 schema for arguments. The SDK does not allow schema references. Without a schema, it accepts any JSON object. In that case, validate arguments in the handler.
+
+`rgb.set` always uses the canonical schema for strict RGB channels and the `on` value. Invalid returned state produces an error. Exceptions produce fixed error messages without raw exception text.
+
+The SDK serializes concurrent calls. See the retry limits below before you use a handler for physical actions.
+
+## Publish state and events
+
+Use `device.publish_state({...})` to report background observations.
+
+Use `device.emit("button", {"pressed": True})` to queue a press event. Queue a separate event for release. Event IDs increase within each random boot ID.
+
+The default queue limit is 64 events. A full queue raises `event_queue_full`. The application must decide how to handle a full queue. Validated state and event values are copied to prevent later changes to those values.
+
+Example injection controls produce simulated events. They are not physical evidence.
+
+## Handle retries
+
+The command cache retains 128 results per process and boot. Within that cache, the same command ID and arguments return the original acknowledgement. Changed arguments with the same ID produce a conflict.
+
+**Known limitation:** an oversized acknowledgement can fail after the handler runs, before the result enters the cache. See [issue 8](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/8). Do not assume retry protection covers this case.
+
+Eviction or restart removes cached results. This is not durable exactly-once delivery. Never use a new command ID to retry an uncertain physical action. The gateway also prevents replay across disconnected sessions.
+
+## Update the protocol
+
+The SDK checks copied protocol files against the [source manifest](../src/grok_gadgets_linux/protocol/source.json) at import. The pin is gateway commit `aeabcaf46cca830894836ac5cb85f3a6d33cd63d`.
+
+Copy only a reviewed canonical version. Record its source and hashes. Do not edit copied schemas independently. The canonical transcript is a contract fixture, not a hardware recording.

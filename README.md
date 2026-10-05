@@ -1,11 +1,10 @@
 # Grok Gadgets Linux SDK
 
-A Python capability library and local device agent for applications targeting Grok
-through the separately installed Grok Gadgets gateway.
+Build a software or Linux device application with this Python library and local agent. Install the Grok Gadgets gateway separately to route commands.
 
-**Experimental alpha.** Software simulation and installed custom factories are tested.
-Recorded Linux aarch64 container acceptance exists; physical peripherals, real systemd
-operation, native Grok invocation receipts, and mobile behavior remain unverified.
+Documentation uses an [ASD-STE100-inspired writing guide](https://github.com/adidshaft/grok-gadgets/blob/main/docs/contributing/writing-guide.md). Formal compliance is not claimed.
+
+**Experimental alpha.** Software simulation and installed custom factories have passed tests. Recorded tests also cover a Linux aarch64 container. Physical peripherals, real systemd operation, actual Grok invocation and mobile behavior remain unverified.
 
 ```mermaid
 flowchart LR
@@ -28,14 +27,13 @@ separate packages. The software example reports state without operating a physic
 
 ## Try a custom software device
 
-Requirements: uv, Python 3.11, tar, and the three prepared package files below.
-Native Apple Silicon Python 3.11.15 is the freshly tested baseline. Installation may
-need network access. The check uses a temporary authenticated loopback listener,
-closes it afterward, and needs no Grok account, API key, hardware, or persistent service.
+You need uv, Python 3.11, tar and three package files. The verified host is Apple Silicon with native Python 3.11.15. Installation can need internet access.
 
-Package releases are not yet published. Build from source: run `uv sync --frozen` and `uv build` in this repository
-and build the gateway wheel separately. No hub checkout is required. Put these files
-in an otherwise empty working folder:
+This check starts an authenticated loopback listener and closes it afterward. It needs no Grok account, API key, hardware or persistent service.
+
+Package releases are not published yet. Run `uv sync --frozen` and `uv build` in this repository. Build the gateway wheel separately. A hub checkout is not necessary.
+
+Put these files in an empty working folder:
 
 - `grok_gadgets_linux_sdk-0.1.0a1-py3-none-any.whl`
 - `grok_gadgets_linux_sdk-0.1.0a1.tar.gz`
@@ -50,32 +48,29 @@ tar -xzf grok_gadgets_linux_sdk-0.1.0a1.tar.gz
 .venv/bin/python -I grok_gadgets_linux_sdk-0.1.0a1/scripts/check_onboarding.py grok_gadgets_linux_sdk-0.1.0a1/docs/development.md
 ```
 
-The source archive supplies a readable verifier and the exact documented Python example.
-The verifier creates a trusted `my_gadget.py` in a fresh temporary folder and starts
-the installed agent with `--factory-file ./my_gadget.py:create`. It authenticates
-`display-1`, requests `display.set`, and asserts the acknowledgement and state:
+The source archive contains the verifier and documented Python example. The verifier creates a trusted `my_gadget.py` in a temporary folder. It starts the installed agent with `--factory-file ./my_gadget.py:create`.
+
+The verifier authenticates `display-1`, requests `display.set`, and checks the acknowledgement and state:
 
 ```json
 {"custom_capability": "display.set", "ack": "executed", "state": {"text": "installed custom works"}, "simulated": true, "physical_verified": false}
 ```
 
-That is a subset of the report. Imports come from installed packages, with no editable
-install or implicit source path. This verifies SDK-to-gateway TCP software behavior,
-not a Grok invocation or MCP-client session. Both packages are installed; no source
-sibling is imported.
+This is part of the report. Imports use installed packages. The check uses no editable installation or implicit source path.
+
+The result verifies SDK-to-gateway software behavior over TCP. It does not verify a Grok invocation or an MCP client session.
 
 ## What the library does
 
-Define a `Device`, declare capabilities with inline argument schemas, and implement
-async handlers returning reported state. The agent registers, polls commands,
-acknowledges results, and sends queued events. The CLI's default lamp and optional
-`--simulate-button` are explicit simulation. Arbitrary factory files execute trusted
-local code, never untrusted content from a conversation.
+1. Define a `Device`.
+2. Declare capabilities and their argument schemas.
+3. Write asynchronous handlers that return reported state.
 
-Protocol copies are hash checked at import. The canonical version is
-[protocol 0.1.0 in the gateway](https://github.com/adidshaft/grok-gadgets-gateway/tree/main/protocol/0.1.0);
-the exact consumed commit and hashes are in [source.json](src/grok_gadgets_linux/protocol/source.json).
-Do not independently rewrite those schemas.
+The agent registers the device, polls for commands, acknowledges results and sends queued events. The default lamp and optional `--simulate-button` are simulations.
+
+Factory files execute trusted local code. Do not execute untrusted content from a conversation.
+
+The SDK checks protocol hashes at import. The canonical contract is [gateway protocol 0.1.0](https://github.com/adidshaft/grok-gadgets-gateway/tree/main/protocol/0.1.0). See [source.json](src/grok_gadgets_linux/protocol/source.json) for the source commit and hashes. Do not edit copied schemas independently.
 
 ## Compatibility and evidence
 
@@ -101,10 +96,9 @@ The [gateway](https://github.com/adidshaft/grok-gadgets-gateway) owns assistant 
 canonical contracts; the [hub](https://github.com/adidshaft/grok-gadgets) owns shared
 architecture, roadmap, and policies. The SDK's own unit checks require no sibling checkout.
 
-The agent accepts only loopback TCP. A cloud Bot cannot execute your local filesystem
-path; a reviewed authenticated remote route is not provided here. Command/event retention
-is bounded and memory-only. Lost acknowledgements or restarts must not trigger a blind
-physical retry under a new ID. See [operation](docs/operation.md) and [security](SECURITY.md).
+The agent accepts only loopback TCP. A cloud Bot cannot execute your local file path. This SDK does not provide an authenticated remote route.
+
+Command and event caches have limits and exist only in memory. Never use a new ID to retry an uncertain physical action. An oversized acknowledgement can also bypass result caching; see [issue 8](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/8). Read [operation](docs/operation.md) and [security](SECURITY.md) before you connect hardware.
 
 | Symptom | Next step |
 | --- | --- |
