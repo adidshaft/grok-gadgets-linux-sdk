@@ -15,7 +15,7 @@
     "milestone": "M0",
     "stage": "done",
     "commits": [
-      "3082cd2"
+      "42a0d95"
     ],
     "evidence": "Foundation review"
   },
@@ -39,7 +39,7 @@
     "milestone": "M3",
     "stage": "done",
     "commits": [
-      "3737a30"
+      "d8fb969"
     ],
     "evidence": "Historical LIN-002 checkpoint: 8 macOS unit tests plus pinned SHA256 contract loading; Linux was pending then and was subsequently recorded under LIN-003."
   },
@@ -63,7 +63,7 @@
     "milestone": "M3",
     "stage": "done",
     "commits": [
-      "2c6c0d8"
+      "b6b9d77"
     ],
     "evidence": "15 tests on macOS and Linux-aarch64 Docker incl installed CLI + real gateway4606023 TCP; pinned Python digest and exact runtime in docs/verification.md"
   },
@@ -114,8 +114,8 @@
     "milestone": "MH",
     "stage": "done",
     "commits": [
-      "ad3bb53ec06930af2625be6ef3abc6f8423002d9",
-      "7d0f82bbbf4292c2ece81982bf0d25e4ee27b633"
+      "dc756de75b904901795725701043e023de4bae23",
+      "126eb1dbe3c616f6c018e8452ac9523ae90bbd4b"
     ],
     "evidence": [
       "docs/verification/hardening.md",
@@ -145,7 +145,7 @@
     "milestone": "PUBLIC-ALPHA",
     "stage": "done",
     "commits": [
-      "b075892586953cd9302f75c3f9256ba5a53207f8"
+      "2f80a15db1cc3515b6ab385a7c72c47e944e2904"
     ],
     "evidence": [
       "docs/verification/launch-docs.md: exact fresh installed README journey passed on macOS27 arm64 CPython3.11.15; canonical public-alpha policy/contact/CODEOWNERS and original Mermaid prepared.",

@@ -124,3 +124,7 @@ or account captures.
 Original code and copied protocol artifacts are [Apache-2.0](LICENSE).
 Retain [NOTICE](NOTICE) and dependency licenses. This independent project is exclusively
 for Grok and is not affiliated with xAI.
+
+## History note
+
+Pre-publication commit dates were reconstructed across 29 September–5 October 2026 at the owner’s request. Verification records retain their actual execution dates. See the [history and privacy record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
