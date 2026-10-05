@@ -317,6 +317,23 @@ class GatewayIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.device.events)
 
     @bounded()
+    async def test_oversized_result_state_is_acknowledged_as_executed(self):
+        calls = []
+
+        async def oversized(arguments):
+            calls.append(arguments)
+            return {"value": "x" * 1970}
+
+        self.device.capability("oversized.set", oversized)
+        await self.start_agent()
+        self.gateway.command("linux-test", "oversized.set", {}, "large-result")
+        await eventually(
+            lambda: self.gateway.command_status("large-result")["status"] == "executed"
+        )
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(self.gateway.command_status("large-result")["reported_state"], {})
+
+    @bounded()
     async def test_revocation_is_fatal_without_retries(self):
         await self.start_agent()
         self.write_credentials(revoked=True)
