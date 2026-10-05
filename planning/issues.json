@@ -316,5 +316,31 @@
       "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
     ],
     "blocker": null
+  },
+  {
+    "id": "REVIEW-LIN-005",
+    "repository": "grok-gadgets-linux-sdk",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A transient gateway credential read failure reported as unauthorized kills connected agents (review LIN-03, SDK side)",
+    "acceptance": [
+      "After a successful hello in the same run, one unauthorized is retried with backoff; a second consecutive one stops the agent",
+      "revoked and unauthorized before any successful hello stay immediately fatal",
+      "unavailable and busy are retryable"
+    ],
+    "dependencies": [],
+    "labels": [
+      "bug",
+      "linux",
+      "P1"
+    ],
+    "milestone": "PUBLIC-ALPHA",
+    "stage": "done",
+    "commits": [],
+    "evidence": [
+      "src/grok_gadgets_linux/agent.py",
+      "tests/test_agent.py",
+      "Source: grok-gadgets-review findings linux-ha-opus.md (2026-10-05)"
+    ],
+    "blocker": null
   }
 ]
