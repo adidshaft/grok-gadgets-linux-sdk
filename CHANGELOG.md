@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0a1 — 6 October 2026
+
 - `grok-linux-agent dev ./my_gadget.py` runs your gadget with an in-process gateway and loopback auto-trust: no tokens to copy. It prints pasteable MCP settings (stdio needs no token at all). Needs the new `[gateway]` extra (`uv sync --extra gateway`; the gateway comes from its GitHub repository until it is on PyPI).
 - `--token-file <path>` reads a private device token and re-reads it on every connection, so `grok-gadgets-gateway enroll <id> --rotate --token-file <path>` needs no agent restart. `--factory-file` accepts a plain gadget file.
 - README: the quick start is one install, one ten-line file and one command.
