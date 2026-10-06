@@ -54,8 +54,7 @@ flowchart LR
 Your file declares a `Gadget` and its commands. The agent connects it to the
 [gateway](https://github.com/adidshaft/grok-gadgets-gateway) on the same computer, and the
 gateway offers its commands to MCP clients, with your one-line descriptions. `dev` runs both
-in one process. Each command's schema comes from its type hints, so bad arguments are refused
-before your code runs.
+in one process. Each command's schema comes from its type hints, so the SDK refuses bad arguments before your code runs.
 
 ## Add your hardware
 
@@ -94,9 +93,8 @@ restart. A systemd user unit template, reconnect limits and exit codes are in th
 ## Platforms
 
 Python 3.11–3.14. CI runs on Ubuntu every night, including the README quick start and the
-gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have
-PyPI wheels for every dependency; the armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
-toolchain for `rpds-py`. No Raspberry Pi has been tested yet; see the
+gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have PyPI wheels for every dependency. The armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
+toolchain for `rpds-py`. Nobody has tested a Raspberry Pi yet; see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
 
 ## Troubleshooting
@@ -127,7 +125,7 @@ Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](
 
 Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
 open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
-xAI**, which make Grok and Grok Bot. Pre-publication commit dates were reconstructed; see the
+xAI**, which make Grok and Grok Bot. We reconstructed the pre-publication commit dates; see the
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
 Detailed verification records: [launch verification](docs/verification/launch-docs.md) and
 [historical record](docs/verification.md).
