@@ -34,6 +34,44 @@ def create():
     return device
 ```
 
+
+## Decorator API
+
+`Gadget` is a `Device` with a decorator. Each command states what it does; its JSON schema
+comes from the function's type hints, and the description reaches the assistant through
+`gadgets_list_devices`.
+
+```python
+from typing import Annotated, Literal
+
+from grok_gadgets_linux import Gadget, Range
+
+lamp = Gadget("desk-lamp", "Desk lamp", state={"on": False, "level": 0})
+
+
+@lamp.command("Turn the desk lamp on or off")
+def set_light(on: bool) -> dict:
+    return {"on": on}  # Updates the reported state.
+
+
+@lamp.command("Set the brightness from 0 to 100", name="level.set")
+def level(level: Annotated[int, Range(0, 100)], mode: Literal["warm", "cool"] = "warm"):
+    return {"level": level}
+
+
+lamp.event("motion", "Someone moved in front of the lamp")
+```
+
+- The command name is the function name with underscores as dots (`set.light`), or `name=`.
+- Supported hints: `bool`, `int`, `float`, `str`, `Literal[...]`, `list[...]`,
+  `X | None` and `Annotated[..., "description", Range(min, max)]`. Parameters with a default
+  are optional. Unknown arguments are rejected.
+- The returned dict is merged into the reported state; return `None` to leave it unchanged.
+- `Gadget` is simulated by default. Pass `simulated=False` only when your code controls hardware.
+- `Device.capability(..., description=...)` adds a description with the original API.
+- Descriptions are 1–300 characters. A TCP hello may be up to 16 KiB, so all 16 capabilities
+  can carry schemas and descriptions.
+
 ## Install and start the agent
 
 Follow the [README quickstart](../README.md#quickstart) to install both packages and
