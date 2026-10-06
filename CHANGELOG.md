@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- New decorator API: `Gadget(...)` with `@gadget.command("What it does")`. The JSON schema comes from type hints (`bool`, `int`, `float`, `str`, `Literal`, `list`, optional, `Annotated` with `Range`). `Device.capability` keeps working and gains `description=`; `event_capability` too.
+- Capability descriptions reach the assistant (gateway `capability_descriptions`). A TCP hello may be up to 16 KiB; other frames stay 2048 bytes. Protocol README re-pinned from gateway `111a6c8`.
 - Re-pin the protocol 0.1.0 README from gateway `d82bc91` (sections and `late_ack`; wire format unchanged). With `GROK_GATEWAY_SOURCE`, a test checks the copied protocol files match that gateway.
 - A handler that overruns `handler_timeout` now gets a `failed` ACK (`handler_timeout`) and the session stays open; a replay of that command ID reports the same failure.
 - `late_ack` and `unknown_command` replies to an ACK are non-fatal: the agent drops that ACK and keeps polling instead of reconnecting.
