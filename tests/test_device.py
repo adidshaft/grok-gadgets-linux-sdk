@@ -1,9 +1,11 @@
 import asyncio
 import json
+import os
 import threading
 import time
 import unittest
 from importlib.resources import files
+from pathlib import Path
 
 from grok_gadgets_linux import Device, SDKError
 from grok_gadgets_linux.contracts import (
@@ -238,7 +240,16 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("TOKEN", json.dumps(ack))
 
     def test_pinned_fixtures_validate_and_match_hashes(self):
-        self.assertEqual(SOURCE["source_commit"], "5ea23b7ff083b1f493540a4f2747a210e8dae27b")
+        self.assertEqual(SOURCE["source_commit"], "d82bc91a2764e9d937003f778e963f2f49996f10")
+        gateway = os.environ.get("GROK_GATEWAY_SOURCE")
+        if gateway:
+            # CI runs against gateway main: a protocol change there must be re-pinned here.
+            canonical = Path(gateway).parent / "protocol" / "0.1.0"
+            copied = files("grok_gadgets_linux").joinpath("protocol", "0.1.0")
+            for name in SOURCE["files"]:
+                self.assertEqual(
+                    copied.joinpath(name).read_bytes(), (canonical / name).read_bytes(), name
+                )
         fixture = files("grok_gadgets_linux").joinpath(
             "protocol", "0.1.0", "fixtures", "device-transcript.json"
         )
