@@ -66,7 +66,8 @@ A handler receives the arguments and returns a complete state object. It can be 
 The handler timeout (5 seconds) bounds the wait for a result. Python cannot stop a thread,
 so a timed-out plain function keeps running until it returns. The SDK does not start the
 next plain-function handler until the previous thread has finished. A timed-out command
-never gets a success acknowledgement.
+gets a `failed` acknowledgement with code `handler_timeout`, never a success, and the
+session stays open for the next command. Its outcome is unknown: check state before acting again.
 
 GPIO-style example (this code is not tested on hardware):
 
