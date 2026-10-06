@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- CI runs the seven gateway integration tests against gateway `main` and fails if they skip. A new job runs the README quick start in fresh clones and calls the gadget over MCP. Both run on push, pull request and nightly.
+
 ## 0.1.0a1 — unpublished
 
 Generic capability SDK and loopback agent with strict pinned contracts, bounded retries,

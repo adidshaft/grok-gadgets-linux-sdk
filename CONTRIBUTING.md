@@ -21,7 +21,7 @@ uv run python -m unittest discover -s tests -v
 uv build
 ```
 
-These checks need no sibling checkout. Without `GROK_GATEWAY_SOURCE`, seven gateway integration tests skip. This result does not prove full integration. Each integration test has a time limit, so a hang is reported as a failure.
+These checks need no sibling checkout. Without `GROK_GATEWAY_SOURCE`, seven gateway integration tests skip locally. CI never skips them: it runs them against gateway `main` on every push, pull request and night. CI also runs the README quick start in fresh clones with `python3 scripts/check_readme_quickstart.py` (commit first; it clones `HEAD`). Each integration test has a time limit, so a hang is reported as a failure.
 
 For runtime or protocol changes, use a reviewed gateway source checkout:
 
