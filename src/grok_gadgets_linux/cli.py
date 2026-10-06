@@ -101,7 +101,7 @@ _HINTS = {
     ),
     "frame_too_large": (
         EXIT_CONTRACT,
-        "A message exceeds 2048 bytes; shorten schemas, descriptions or state.",
+        "A message is too large (hello 16 KiB, others 2048 bytes); shorten schemas, descriptions or state.",
     ),
     "duplicate_conflict": (
         EXIT_CONTRACT,

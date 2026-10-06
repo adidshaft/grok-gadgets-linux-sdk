@@ -7,7 +7,10 @@ from importlib.resources import files
 from jsonschema import Draft202012Validator
 
 VERSION = "0.1.0"
+# Every frame fits 2048 bytes, except a TCP hello, which may use 16 KiB so that it can
+# carry schemas and descriptions for every capability (protocol 0.1.0 README, Transport).
 MAX_FRAME = 2048
+MAX_HELLO_FRAME = 16384
 _root = files("grok_gadgets_linux").joinpath("protocol")
 SOURCE = json.loads(_root.joinpath("source.json").read_text())
 for _name, _digest in SOURCE["files"].items():
@@ -42,14 +45,14 @@ class SDKError(Exception):
         super().__init__(code)
 
 
-def validate_request(message):
+def validate_request(message, limit=MAX_FRAME):
     if not REQUEST_VALIDATOR.is_valid(message):
         raise SDKError("invalid_request")
     try:
         encoded = json.dumps(message, separators=(",", ":"), allow_nan=False).encode() + b"\n"
     except (ValueError, TypeError, RecursionError):
         raise SDKError("invalid_request") from None
-    if len(encoded) > MAX_FRAME:
+    if len(encoded) > limit:
         raise SDKError("frame_too_large")
     return encoded
 

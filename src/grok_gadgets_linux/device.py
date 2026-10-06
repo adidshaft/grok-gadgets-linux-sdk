@@ -14,6 +14,7 @@ from jsonschema import Draft202012Validator
 from .contracts import (
     ACK_ERRORS,
     EVENT_KIND,
+    MAX_HELLO_FRAME,
     RESERVED_EVENTS,
     RGB_SCHEMA,
     VERSION,
@@ -59,6 +60,7 @@ class Device:
         self.handlers = {}
         self.schemas = {}
         self.event_names = set()
+        self.event_descriptions = {}
         self.events = deque()
         self.event_limit = event_limit
         self.command_limit = command_limit
@@ -82,8 +84,18 @@ class Device:
         if name in self.handlers or name in self.event_names:
             raise SDKError("duplicate_capability")
 
-    def capability(self, name, handler, *, schema=None):
+    @staticmethod
+    def _described(schema, description):
+        if description is None:
+            return schema
+        if not isinstance(description, str) or not 1 <= len(description.strip()) <= 300:
+            raise SDKError("invalid_description")
+        return {**(schema or {"type": "object"}), "description": description}
+
+    def capability(self, name, handler, *, schema=None, description=None):
         """Register a handler returning a full observed-state object.
+
+        `description` says what the command does; the gateway shows it to the assistant.
 
         Async handlers run on the event loop. Plain functions run in a worker thread, so
         blocking GPIO/I2C/SPI calls do not stall polling; the handler timeout bounds the
@@ -96,17 +108,22 @@ class Device:
             raise TypeError("Capability handlers must be callable")
         if name == "rgb.set":
             schema = RGB_SCHEMA
+        schema = self._described(schema, description) if name != "rgb.set" else schema
         if schema is not None:
             validate_inline_schema(schema)
             self.schemas[name] = copy.deepcopy(schema)
         self.handlers[name] = handler
         return self
 
-    def event_capability(self, name):
+    def event_capability(self, name, *, description=None):
         """Declare an input event; custom names are marked so gateways never offer a command."""
         self._check_name(name)
         if name == "history_lost":
             raise SDKError("invalid_capability")
+        if description is not None:
+            if name in RESERVED_EVENTS:
+                raise SDKError("invalid_capability")
+            self.event_descriptions[name] = self._described(None, description)["description"]
         self.event_names.add(name)
         return self
 
@@ -152,10 +169,12 @@ class Device:
         schemas = {name: schema for name, schema in self.schemas.items() if name != "rgb.set"}
         for name in sorted(self.event_names - RESERVED_EVENTS):
             schemas[name] = {"type": "object", EVENT_KIND: "event"}
+            if name in self.event_descriptions:
+                schemas[name]["description"] = self.event_descriptions[name]
         if schemas:
             device["capability_schemas"] = schemas
         message = {"type": "hello", "protocol_version": VERSION, "token": token, "device": device}
-        validate_request(message)
+        validate_request(message, MAX_HELLO_FRAME)
         return message
 
     def emit(self, name, data, *, observed_at=None):
