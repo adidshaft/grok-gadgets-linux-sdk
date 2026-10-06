@@ -49,9 +49,13 @@ loopback gateway and prints `"ack": "executed"`. Run the lint/format/unit/build 
 before committing documentation as well as code. Linux service/peripheral claims need
 their own authorized Linux/hardware observations.
 
+## Branches
+
+Branch from `dev` and open your PR into `dev`; it is the default branch and is squash-merged when checks pass. `main` holds only tagged stable releases and changes through release or hotfix PRs. Name branches `<type>/<ISSUE-ID>-<short-slug>`, for example `fix/LIN-021-short-name`. The shared [branch and release policy](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md#branches-and-releases) covers releases, hotfixes and cross-repository changes.
+
 ## Review and credit
 
-Use a short branch from `main`. Make small tested commits and link the public issue. Explain the behavior before and after the change. Add a regression test when necessary.
+Use a short branch from `dev`. Make small tested commits and link the public issue. Explain the behavior before and after the change. Add a regression test when necessary.
 
 Record commands, results, runtime and evidence level. Update user guidance. Respond to review and resolve conflicts on your branch. Then repeat affected checks.
 
