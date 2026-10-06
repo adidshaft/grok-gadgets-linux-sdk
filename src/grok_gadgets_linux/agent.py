@@ -5,7 +5,14 @@ import json
 import random
 import time
 
-from .contracts import MAX_FRAME, RESPONSE_VALIDATOR, VERSION, SDKError, validate_request
+from .contracts import (
+    MAX_FRAME,
+    MAX_HELLO_FRAME,
+    RESPONSE_VALIDATOR,
+    VERSION,
+    SDKError,
+    validate_request,
+)
 
 AUTH_ERRORS = {"unauthorized", "revoked"}
 # Gateway-reported duplicate_conflict means a changed ACK/event for a retained ID: an SDK or
@@ -73,7 +80,8 @@ class Agent:
         return random.uniform(ceiling / 2, ceiling)
 
     async def exchange(self, reader, writer, message):
-        writer.write(validate_request(message))
+        hello = message.get("type") == "hello"
+        writer.write(validate_request(message, MAX_HELLO_FRAME if hello else MAX_FRAME))
         await asyncio.wait_for(writer.drain(), self.request_timeout)
         line = await asyncio.wait_for(reader.readline(), self.request_timeout)
         if not line or not line.endswith(b"\n") or len(line) > MAX_FRAME:

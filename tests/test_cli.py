@@ -201,7 +201,9 @@ class CliExitTests(unittest.IsolatedAsyncioTestCase):
             "def create():\n"
             '    device = Device("big-1", "big", simulated=True)\n'
             "    for n in range(6):\n"
-            '        device.capability(f"c{n}", h, schema={"type": "object", "description": "d" * 300})\n'
+            "        values = [f'v{i}' + 'x' * 100 for i in range(30)]\n"
+            '        schema = {"type": "object", "properties": {"v": {"enum": values}}}\n'
+            '        device.capability(f"c{n}", h, schema=schema)\n'
             "    return device\n"
         )
         port = str(self.gateway.port)
