@@ -121,6 +121,7 @@ Show your gadget, ask questions and share ideas on
 [good first issue](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 and read [CONTRIBUTING](CONTRIBUTING.md). Help: [SUPPORT](SUPPORT.md). Security:
 [SECURITY](SECURITY.md). Keep tokens and household details out of public posts.
+Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](CONTRIBUTING.md#branches)).
 
 ## License and affiliation
 
