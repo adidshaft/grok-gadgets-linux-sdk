@@ -27,6 +27,7 @@ ACK_ERRORS = {
     "unsupported_capability": "Device could not confirm requested execution",
     "invalid_arguments": "Device could not confirm requested execution",
     "handler_failed": "Device could not confirm requested execution",
+    "handler_timeout": "Handler did not finish in time; check state before acting again",
     "duplicate_conflict": "Command ID reused with changed arguments; not executed",
 }
 EVENT_KIND = "x-grok-gadgets-kind"

@@ -98,7 +98,7 @@ credential-file read failure that way; a second consecutive `unauthorized` stops
 agent. `unavailable`, `busy` and connection failures are retried. Each request rechecks
 gateway revocation. Shutdown interrupts a reconnect delay.
 
-A lost event acknowledgement retains the event ID for reconnect. The gateway does not replay a dispatched command into a new session. A handler timeout produces no success acknowledgement. On disconnect, the gateway marks that command unconfirmed.
+A lost event acknowledgement retains the event ID for reconnect. The gateway does not replay a dispatched command into a new session. A handler timeout sends a `failed` acknowledgement (`handler_timeout`) and keeps the session. If an acknowledgement reaches the gateway after the command closed, the gateway answers `late_ack`; the agent drops that acknowledgement and keeps polling on the same session. On disconnect, the gateway marks a dispatched command unconfirmed.
 
 Async handlers must respond to cancellation. A plain-function handler runs in a worker
 thread: the timeout stops the wait, not the thread. Do not detach physical actions from a handler.
