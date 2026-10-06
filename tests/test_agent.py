@@ -113,6 +113,31 @@ class AgentUnitTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(agent.retries, 2)
 
     @bounded()
+    async def test_late_ack_and_unknown_command_replies_keep_the_session(self):
+        for code in ("late_ack", "unknown_command"):
+            with self.subTest(code=code):
+                device = Device("linux-test", "test", simulated=True)
+                device.capability("custom.set", lambda arguments: {"v": arguments["v"]})
+                pending = [{"command_id": "c1", "capability": "custom.set", "arguments": {"v": 1}}]
+
+                def respond(message, connection, code=code):
+                    if message["type"] == "hello":
+                        return OK_HELLO
+                    if message["type"] == "poll":
+                        return {"ok": True, "commands": [pending.pop()] if pending else []}
+                    if message["type"] == "ack":
+                        return error(code)
+                    return {"ok": True}
+
+                agent, gateway = await self.run_against(
+                    respond,
+                    device=device,
+                    stop_when=lambda a, g: a.dropped_acks and len(g.received) > 8,
+                )
+                self.assertEqual((agent.sessions, agent.retries, gateway.connections), (1, 0, 1))
+                self.assertEqual(agent.dropped_acks, 1)
+
+    @bounded()
     async def test_deeply_nested_reply_is_invalid_response(self):
         nested = b"[" * 1020 + b"]" * 1020 + b"\n"
         with self.assertRaises(SDKError) as caught:
@@ -369,9 +394,40 @@ class GatewayIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.agent.handler_timeout = 0.01
         await self.start_agent()
         self.gateway.command("linux-test", "slow", {}, "slow-cmd")
-        await eventually(lambda: self.gateway.command_status("slow-cmd")["status"] == "unconfirmed")
-        self.assertNotEqual(self.gateway.command_status("slow-cmd")["status"], "executed")
+        await eventually(lambda: self.gateway.command_status("slow-cmd")["status"] == "failed")
+        self.assertEqual(self.gateway.command_status("slow-cmd")["error"]["code"], "device_failed")
         self.assertEqual(self.device.state, {})
+        # The session survives: the next command runs on the same connection.
+        self.gateway.command("linux-test", "custom.set", {"value": 4}, "after-slow")
+        await eventually(lambda: self.gateway.command_status("after-slow")["status"] == "executed")
+        self.assertEqual((self.agent.sessions, self.agent.retries), (1, 0))
+        # A replay of the timed-out ID reports the same failure without running it again.
+        self.assertEqual(self.device.results["slow-cmd"][1], "handler_timeout")
+
+    @bounded()
+    async def test_late_ack_from_the_real_gateway_keeps_the_session(self):
+        clock = [0.0]
+        self.gateway.clock = lambda: clock[0]
+        release = asyncio.Event()
+
+        async def waits(arguments):
+            await release.wait()
+            return {"late": True}
+
+        self.device.capability("waits", waits)
+        self.agent.handler_timeout = 5
+        await self.start_agent()
+        self.gateway.command("linux-test", "waits", {}, "late-cmd")
+        await eventually(lambda: self.gateway.command_status("late-cmd")["status"] == "dispatched")
+        clock[0] += 60  # The gateway's ACK deadline passes while the handler runs.
+        self.assertEqual(self.gateway.command_status("late-cmd")["status"], "timed_out")
+        release.set()
+        await eventually(lambda: self.agent.dropped_acks == 1)
+        self.assertEqual(self.gateway.command_status("late-cmd")["status"], "timed_out")
+        self.assertIn("late_ack", self.gateway.commands["late-cmd"])
+        self.gateway.command("linux-test", "custom.set", {"value": 5}, "after-late")
+        await eventually(lambda: self.gateway.command_status("after-late")["status"] == "executed")
+        self.assertEqual((self.agent.sessions, self.agent.retries), (1, 0))
 
     @bounded()
     async def test_installed_cli_software_example(self):
