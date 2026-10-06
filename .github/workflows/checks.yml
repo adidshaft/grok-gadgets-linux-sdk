@@ -39,37 +39,30 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: '0.12.3'
-      - run: uv sync --frozen --python ${{ matrix.python-version }}
+      - run: uv sync --frozen --extra gateway --python ${{ matrix.python-version }}
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - name: Unit and gateway-main integration tests
         run: |
           git -C ../grok-gadgets-gateway log -1 --format='Gateway main %H'
           uv run python -m unittest discover -s tests -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
-          if grep -q "skipped 'Set GROK_GATEWAY_SOURCE" "$RUNNER_TEMP/tests.log"; then
+          if grep -q "skipped 'Set GROK_GATEWAY_SOURCE\|skipped 'Install the \[gateway\]" "$RUNNER_TEMP/tests.log"; then
             echo "Gateway integration tests skipped" >&2; exit 1
           fi
         timeout-minutes: 5
       - run: uv build
   readme-quickstart:
-    # The README quick start in fresh clones beside gateway main, then a real MCP call.
+    # The README quick start in a fresh clone (install, my_gadget.py, dev), then a real MCP call.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          path: grok-gadgets-linux-sdk
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: adidshaft/grok-gadgets-gateway
-          ref: main
-          path: grok-gadgets-gateway
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: '0.12.3'
-      - run: python3 grok-gadgets-linux-sdk/scripts/check_readme_quickstart.py grok-gadgets-gateway
+      - run: python3 scripts/check_readme_quickstart.py
   linux-sdk-checks:
     name: linux-sdk-checks
     if: always()

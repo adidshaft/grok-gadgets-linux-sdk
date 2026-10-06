@@ -15,20 +15,22 @@ for the future cloud route and product hosting choices.
 
 ## Start the agent
 
-1. Install both packages as shown in the [README](../README.md#quickstart).
-   Run `.venv/bin/grok-gadgets-gateway init` to create the credential registry and MCP bearer.
-2. Get a per-device token: `grok-gadgets-gateway enroll linux-lamp-1`. It prints
-   `GROK_GADGETS_DEVICE_TOKEN=...`. The gateway owns this command; see its README for
-   the credential-file option. The default software device ID is `linux-lamp-1`.
-3. Start the gateway so that its device listener runs: either `grok-gadgets-gateway serve`,
-   or an MCP client that starts the gateway with `--credentials` (see below). A gateway
-   started over stdio without a credential file has no device listener.
-4. Set `GROK_GADGETS_DEVICE_TOKEN` privately to the token. `GROK_DEVICE_TOKEN` still
-   works but is deprecated.
-5. Run `.venv/bin/grok-linux-agent`.
-6. Request device capabilities through gateway MCP.
+For development, `grok-linux-agent dev ./my_gadget.py` is all you need: it starts a gateway in
+the same process, trusts your gadget on loopback and prints MCP client settings. Add `--stdio`
+when an MCP client should start it; that path needs no token at all.
 
-The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory-file ./my_gadget.py:create` or `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
+To run beside a long-running gateway service instead:
+
+1. Install the gateway and run `grok-gadgets-gateway init` once.
+2. Issue a device token into a private file:
+   `grok-gadgets-gateway enroll desk-lamp --token-file desk-lamp.token`.
+   The device ID must match your `Gadget(...)`.
+3. Start the gateway: `grok-gadgets-gateway serve`.
+4. Run `grok-linux-agent --factory-file ./my_gadget.py --token-file desk-lamp.token`.
+   `GROK_GADGETS_DEVICE_TOKEN` also works; `GROK_DEVICE_TOKEN` is deprecated.
+5. Request device capabilities through gateway MCP.
+
+The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory-file ./my_gadget.py` (one module-level `Gadget`, or `path.py:function`) or `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
 
 ### Connect a local MCP client
 
@@ -135,16 +137,11 @@ connected.
 
 ## Recover a device token
 
-`enroll` creates a new ID; it does not replace an existing ID or undo revocation.
-For a later run, the original token is under your device ID in the private
-`~/.config/grok-gadgets/credentials.json` file. Load it into
-`GROK_GADGETS_DEVICE_TOKEN` without printing it or saving it in shell history.
-`XDG_CONFIG_HOME` can change this file's parent directory.
-
-To replace a revoked or exposed token, enroll a new device ID and use that ID in your
-`Device(...)` factory. Revoke the old ID. Keep the factory ID and new token together.
-The gateway's [enrollment guide](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/local-operation.md#per-device-credential-enrollment)
-also documents private registry edits when you must keep an ID.
+Issue a new token for the same device ID with
+`grok-gadgets-gateway enroll <device-id> --rotate --token-file <file>`. The old token stops
+working at once. An agent started with `--token-file <file>` reads the file again on its next
+connection, so it reconnects without a restart. Rotating also reactivates a revoked ID.
+`XDG_CONFIG_HOME` changes where the gateway keeps its registry.
 
 ## Prepare a Linux user service
 
