@@ -64,9 +64,14 @@ thread, so blocking calls are fine; `async def` works too. Return what the devic
 reports. Set `simulated=False` only when your code really controls hardware.
 
 ```python
+from typing import Annotated
+
+from grok_gadgets_linux import Range
+
+
 @lamp.command("Set the brightness from 0 to 100", name="level.set")
 def level(level: Annotated[int, Range(0, 100)]) -> dict:
-    pwm.duty(level)
+    # pwm.duty(level)  <- your hardware call goes here
     return {"level": level}
 ```
 
