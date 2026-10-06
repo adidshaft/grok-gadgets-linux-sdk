@@ -48,4 +48,4 @@ line-length = 100
 
 [tool.uv.sources]
 # Until the gateway is on PyPI, the extra comes from its public repository.
-grok-gadgets-gateway = { git = "https://github.com/adidshaft/grok-gadgets-gateway", branch = "main" }
+grok-gadgets-gateway = { git = "https://github.com/adidshaft/grok-gadgets-gateway", tag = "v0.1.0-alpha.1" }
