@@ -155,3 +155,44 @@ class GatewayDescriptionTests(unittest.IsolatedAsyncioTestCase):
                 stop.set()
                 await asyncio.wait_for(task, 2)
                 await server.close()
+
+
+@unittest.skipUnless(GATEWAY_SOURCE, "Set GROK_GATEWAY_SOURCE for real gateway integration")
+class TokenFileRotationTests(unittest.IsolatedAsyncioTestCase):
+    @bounded()
+    async def test_agent_rereads_a_rotated_token_file(self):
+        sys.path.insert(0, GATEWAY_SOURCE)
+        from grok_gadgets_gateway.domain import Gateway
+        from grok_gadgets_gateway.operator import enroll, write_token_file
+        from grok_gadgets_gateway.transport import Credentials, DeviceServer
+        from grok_gadgets_linux.cli import _token_file
+
+        with tempfile.TemporaryDirectory() as folder:
+            registry = Path(folder) / "credentials.json"
+            token_file = Path(folder) / "lamp.token"
+            write_token_file(token_file, enroll("lamp-1", registry))
+            gateway = Gateway()
+            server = await DeviceServer(gateway, Credentials(registry), port=0).start()
+            lamp = Gadget("lamp-1", "Lamp")
+            stop = asyncio.Event()
+            agent = Agent(
+                lamp,
+                _token_file(token_file),
+                port=server.port,
+                poll_interval=0.01,
+                backoff_initial=0.01,
+                backoff_cap=0.02,
+            )
+            task = asyncio.create_task(agent.run(stop))
+            try:
+                await asyncio.wait_for(agent.connected.wait(), 2)
+                write_token_file(token_file, enroll("lamp-1", registry, rotate=True))
+                async with asyncio.timeout(5):
+                    while agent.sessions < 2 or not agent.connected.is_set():
+                        await asyncio.sleep(0.01)
+                self.assertFalse(task.done())
+                self.assertTrue(gateway.state("lamp-1")["available"])
+            finally:
+                stop.set()
+                await asyncio.wait_for(task, 2)
+                await server.close()

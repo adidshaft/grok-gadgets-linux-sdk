@@ -14,7 +14,7 @@ Use Python 3.11 or later and uv. CI runs the same sequence on Python 3.11, 3.12,
 
 ```sh
 git switch -c docs/clearer-device-example
-uv sync --frozen --python 3.11
+uv sync --frozen --extra gateway --python 3.11
 uv run ruff check .
 uv run ruff format --check .
 uv run python -m unittest discover -s tests -v

@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fake_gateway import FakeGateway, bounded, error
-from grok_gadgets_linux.cli import FactoryError, _token, load_factory, main
+from grok_gadgets_linux.cli import FactoryError, _token, load_device_file, load_factory, main
 
 
 async def eventually(predicate, timeout=10):
@@ -162,17 +162,19 @@ async def run_agent(*args, environment, cwd=None, timeout=10):
 class ReadmeQuickstartTests(unittest.IsolatedAsyncioTestCase):
     async def test_readme_gadget_loads_and_executes(self):
         source = (ROOT / "README.md").read_text().split("```python\n", 1)[1].split("```", 1)[0]
-        self.assertLessEqual(len(source.strip().splitlines()), 12)
+        # The hello world stays about ten lines.
+        self.assertLessEqual(len([line for line in source.splitlines() if line.strip()]), 8)
         with tempfile.TemporaryDirectory() as directory:
             file = Path(directory) / "my_gadget.py"
             file.write_text(source)
-            device = load_factory(f"{file}:create", file=True)
-        command = {"command_id": "q1", "capability": "lamp.set", "arguments": {"on": True}}
+            device = load_device_file(str(file))
+        command = {"command_id": "q1", "capability": "set.light", "arguments": {"on": True}}
         ack = await device.execute(command)
         self.assertEqual((ack["status"], ack["state"]), ("executed", {"on": True}))
         bad = await device.execute({**command, "command_id": "q2", "arguments": {"on": 1}})
         self.assertEqual(bad["error"]["code"], "invalid_arguments")
-        self.assertIn("lamp.set", device.hello(TOKEN)["device"]["capability_schemas"])
+        schema = device.hello(TOKEN)["device"]["capability_schemas"]["set.light"]
+        self.assertEqual(schema["description"], "Turn the desk lamp on or off")
 
 
 class CliExitTests(unittest.IsolatedAsyncioTestCase):
