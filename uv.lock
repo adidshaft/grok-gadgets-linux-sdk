@@ -221,7 +221,7 @@ wheels = [
 [[package]]
 name = "grok-gadgets-gateway"
 version = "0.1.0a1"
-source = { git = "https://github.com/adidshaft/grok-gadgets-gateway?branch=main#669b86c81eb5a5ffa32ce5b9d05937ccd6d831ec" }
+source = { git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.1#0188648110567dca4f7f460b1c5e1691d7b41b6d" }
 dependencies = [
     { name = "jsonschema" },
     { name = "mcp" },
@@ -248,7 +248,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", git = "https://github.com/adidshaft/grok-gadgets-gateway?branch=main" },
+    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.1" },
     { name = "jsonschema", specifier = "==4.26.0" },
 ]
 provides-extras = ["gateway"]
