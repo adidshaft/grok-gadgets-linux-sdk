@@ -107,8 +107,8 @@ files at import; see [source.json](src/grok_gadgets_linux/protocol/source.json).
 
 ### Supported platforms
 
-Python 3.11 or later. CI is configured for 3.11, 3.12, 3.13 and 3.14 on Ubuntu; hosted
-runs of that matrix are pending.
+Python 3.11 or later. Hosted CI runs 3.11, 3.12, 3.13 and 3.14 on Ubuntu, including the
+gateway integration tests against gateway `main` and the README quick start, nightly too.
 
 | Raspberry Pi | OS architecture | Dependency wheels |
 | --- | --- | --- |
@@ -143,7 +143,7 @@ The agent prints `Agent stopped (<code>). <hint>` and exits with a distinct code
 | 5 | `reconnect_exhausted` | Start the gateway, or use `--retry-forever` |
 
 `GROK_DEVICE_TOKEN` still works but is deprecated. Without `GROK_GATEWAY_SOURCE`, seven
-gateway integration tests skip; see [CONTRIBUTING](CONTRIBUTING.md).
+gateway integration tests skip locally (CI always runs them); see [CONTRIBUTING](CONTRIBUTING.md).
 
 Command and event caches are limited and exist only in memory. Never use a new command
 ID to retry an uncertain physical action.
