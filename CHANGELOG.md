@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Re-pin the protocol 0.1.0 README from gateway `d82bc91` (sections and `late_ack`; wire format unchanged). With `GROK_GATEWAY_SOURCE`, a test checks the copied protocol files match that gateway.
+- A handler that overruns `handler_timeout` now gets a `failed` ACK (`handler_timeout`) and the session stays open; a replay of that command ID reports the same failure.
+- `late_ack` and `unknown_command` replies to an ACK are non-fatal: the agent drops that ACK and keeps polling instead of reconnecting.
 - CI runs the seven gateway integration tests against gateway `main` and fails if they skip. A new job runs the README quick start in fresh clones and calls the gadget over MCP. Both run on push, pull request and nightly.
 
 ## 0.1.0a1 — unpublished

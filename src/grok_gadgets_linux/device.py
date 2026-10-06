@@ -197,15 +197,30 @@ class Device:
         validate_request(ack)
         return ack
 
-    async def _execute(self, command):
-        cid = command["command_id"]
-        # Validate identifiers and the largest possible ACK before any physical handler runs.
-        validate_request(worst_case_ack(self.state, cid))
-        fingerprint = json.dumps(
+    @staticmethod
+    def _fingerprint(command):
+        return json.dumps(
             {"capability": command["capability"], "arguments": command["arguments"]},
             sort_keys=True,
             allow_nan=False,
         )
+
+    def _remember(self, cid, fingerprint, error):
+        self.results[cid] = (fingerprint, error)
+        while len(self.results) > self.command_limit:
+            self.results.popitem(last=False)
+
+    def timed_out(self, command):
+        """Failed ACK for a handler that overran; a replay of this ID reports the same."""
+        cid = command["command_id"]
+        self._remember(cid, self._fingerprint(command), "handler_timeout")
+        return self._ack(cid, "handler_timeout")
+
+    async def _execute(self, command):
+        cid = command["command_id"]
+        # Validate identifiers and the largest possible ACK before any physical handler runs.
+        validate_request(worst_case_ack(self.state, cid))
+        fingerprint = self._fingerprint(command)
         if cid in self.results:
             previous, error = self.results[cid]
             if previous != fingerprint:
@@ -239,7 +254,5 @@ class Device:
                 # Handler errors may include credentials: return only a fixed failure.
                 error = "handler_failed"
         ack = self._ack(cid, error)
-        self.results[cid] = (fingerprint, error)
-        while len(self.results) > self.command_limit:
-            self.results.popitem(last=False)
+        self._remember(cid, fingerprint, error)
         return ack

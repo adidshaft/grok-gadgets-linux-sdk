@@ -18,8 +18,11 @@ CONTRACT_ERRORS = {
     "duplicate_conflict",
 }
 _FATAL = AUTH_ERRORS | CONTRACT_ERRORS
+# Replies to an ACK that leave the session open (protocol 0.1.0 README, "Errors"): the
+# command already closed or is not ours, so drop that ACK and keep polling.
+ACK_NON_FATAL = {"late_ack", "unknown_command"}
 # Retryable: these plus connection_lost and remote_error (unknown codes, for forward compatibility).
-_KNOWN_ERRORS = _FATAL | {"stale_session", "unknown_command", "busy", "unavailable"}
+_KNOWN_ERRORS = _FATAL | ACK_NON_FATAL | {"stale_session", "busy", "unavailable"}
 
 
 class Agent:
@@ -61,6 +64,7 @@ class Agent:
         self.connected = asyncio.Event()
         self.sessions = 0
         self.retries = 0
+        self.dropped_acks = 0
         self._auth_grace = False
 
     def retry_delay(self, attempt):
@@ -127,11 +131,19 @@ class Agent:
                 if not isinstance(commands, list) or len(commands) > 1:
                     raise SDKError("invalid_response")
                 for command in commands:
-                    # A cancelled/timed-out handler receives no success ACK; gateway stays unconfirmed.
-                    ack = await self._handle(command, stop)
+                    try:
+                        ack = await self._handle(command, stop)
+                    except TimeoutError:
+                        # Never claim success; report the overrun and keep this session.
+                        ack = self.device.timed_out(command)
                     if ack is None:
                         return
-                    await self.exchange(reader, writer, ack)
+                    try:
+                        await self.exchange(reader, writer, ack)
+                    except SDKError as error:
+                        if error.code not in ACK_NON_FATAL:
+                            raise
+                        self.dropped_acks += 1
                 try:
                     await asyncio.wait_for(stop.wait(), self.poll_interval)
                 except TimeoutError:
