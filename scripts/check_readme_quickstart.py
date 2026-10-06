@@ -1,12 +1,11 @@
-"""Run the README quick start in fresh clones and call the gadget over MCP.
+"""Run the README quick start in a fresh clone and call the gadget over MCP.
 
-    python3 scripts/check_readme_quickstart.py [GATEWAY_CHECKOUT]
+    python3 scripts/check_readme_quickstart.py
 
-Clones this checkout's HEAD and the gateway (default ../grok-gadgets-gateway) side by side
-in a temporary folder, as the README does; commit your change first. The README `git clone`
-and `cd` lines are skipped because those clones exist. Blocks that start a long-running
-process (serve, the agent) run in the background. A temporary config directory keeps your
-own tokens untouched. Software only: no Grok Bot, hardware or systemd.
+Clones this checkout's HEAD into a temporary folder; commit your change first. The README
+`git clone` and `cd` lines are skipped because that clone exists. A block that starts a
+long-running process (`grok-linux-agent dev`) runs in the background. A temporary config
+directory keeps your own tokens untouched. Software only: no Grok Bot, hardware or systemd.
 """
 
 import json
@@ -22,6 +21,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LONG_RUNNING = ("grok-gadgets-gateway serve", "grok-linux-agent")
+# The README example: change these together with it.
+DEVICE, CAPABILITY, ARGUMENTS, STATE = "desk-lamp", "set.light", {"on": True}, {"on": True}
 CLIENT = r"""
 import asyncio, json, sys
 from mcp import ClientSession
@@ -39,12 +40,12 @@ async def main(url, token):
 
             for _ in range(100):
                 devices = (await call("gadgets_list_devices"))["devices"]
-                if any(d["device_id"] == "my-pi" and d["available"] for d in devices):
+                if any(d["device_id"] == DEVICE and d["available"] for d in devices):
                     break
                 await asyncio.sleep(0.1)
             command = (await call(
-                "gadgets_command", device_id="my-pi", capability="lamp.set",
-                arguments={"on": True},
+                "gadgets_command", device_id=DEVICE, capability=CAPABILITY,
+                arguments=ARGUMENTS,
             ))["command"]
             for _ in range(100):
                 if command["status"] not in ("accepted", "dispatched"):
@@ -53,14 +54,18 @@ async def main(url, token):
                 command = (await call(
                     "gadgets_command_status", command_id=command["command_id"]
                 ))["command"]
-            state = (await call("gadgets_get_state", device_id="my-pi"))["device"]
+            state = (await call("gadgets_get_state", device_id=DEVICE))["device"]
             print(json.dumps({
                 "devices": [d["device_id"] for d in devices],
                 "status": command["status"],
+                "description": next(
+                    d for d in devices if d["device_id"] == DEVICE
+                )["capability_descriptions"].get(CAPABILITY),
                 "state": state["state"],
                 "simulated": state["simulated"],
             }))
 
+DEVICE, CAPABILITY, ARGUMENTS = sys.argv[3], sys.argv[4], json.loads(sys.argv[5])
 asyncio.run(main(sys.argv[1], sys.argv[2]))
 """
 
@@ -89,13 +94,11 @@ def check(condition, message):
 
 
 def main():
-    gateway = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT.parent / "grok-gadgets-gateway")
     background = []
     with tempfile.TemporaryDirectory(prefix="grok-linux-readme-") as folder:
         workspace = Path(folder)
         sdk = workspace / "grok-gadgets-linux-sdk"
-        for source, target in [(ROOT, sdk), (gateway, workspace / "grok-gadgets-gateway")]:
-            subprocess.run(["git", "clone", "-q", str(source), str(target)], check=True)
+        subprocess.run(["git", "clone", "-q", str(ROOT), str(sdk)], check=True)
         env = {**os.environ, "XDG_CONFIG_HOME": str(workspace / "config")}
         env.pop("GROK_GADGETS_DEVICE_TOKEN", None)
         try:
@@ -114,15 +117,22 @@ def main():
                         ["bash", "-c", script], cwd=sdk, env=env, start_new_session=True
                     )
                     background.append(process)
-                    if "serve" in body:
-                        wait_for_port(8766)
-                        wait_for_port(8765)
+                    wait_for_port(8766, seconds=120)
                 else:
                     subprocess.run(["bash", "-c", script], cwd=sdk, env=env, check=True)
-            check(len(background) == 2, "README started the gateway and the agent")
+            check(len(background) >= 1, "README started the gadget")
             token = (workspace / "config/grok-gadgets/mcp-token").read_text().strip()
             result = subprocess.run(
-                [str(sdk / ".venv/bin/python"), "-c", CLIENT, "http://127.0.0.1:8766/mcp", token],
+                [
+                    str(sdk / ".venv/bin/python"),
+                    "-c",
+                    CLIENT,
+                    "http://127.0.0.1:8766/mcp",
+                    token,
+                    DEVICE,
+                    CAPABILITY,
+                    json.dumps(ARGUMENTS),
+                ],
                 cwd=sdk,
                 env=env,
                 capture_output=True,
@@ -132,9 +142,10 @@ def main():
             if result.returncode:
                 raise SystemExit(result.stdout + result.stderr)
             outcome = json.loads(result.stdout.strip().splitlines()[-1])
-            check("my-pi" in outcome["devices"], "the MCP client lists my-pi")
-            check(outcome["status"] == "executed", "lamp.set reaches executed")
-            check(outcome["state"] == {"on": True}, "reported state is {'on': True}")
+            check(DEVICE in outcome["devices"], f"the MCP client lists {DEVICE}")
+            check(outcome["description"], f"{CAPABILITY} has a description for the model")
+            check(outcome["status"] == "executed", f"{CAPABILITY} reaches executed")
+            check(outcome["state"] == STATE, f"reported state is {STATE}")
             check(outcome["simulated"] is True, "the device is labelled simulated")
         finally:
             for process in reversed(background):

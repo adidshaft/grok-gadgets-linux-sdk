@@ -1,81 +1,52 @@
 # Grok Gadgets Linux SDK
 
-Build gadgets for your existing **Grok Bot** with Python functions. The SDK connects
-your functions to the [gateway](https://github.com/adidshaft/grok-gadgets-gateway)
-on the same computer. Start with a software lamp, then add your peripheral code.
-Experimental alpha; the actual Grok Bot connection is not verified.
-
-## What works with Grok Bot today
-
-- **Local MCP client on the same computer:** works. A client that starts the gateway
-  can list your gadget and call its functions. Tested in software only.
-- **Grok Bot (cloud):** cannot open this computer. Loopback
-  `grok-gadgets-gateway serve` exists. A cloud Bot would also need HTTPS that you
-  run in front of it. That remote route is **not implemented here** and is **not
-  verified with Grok Bot**. Never expose the agent's device port (8765).
-- **Not verified:** physical peripherals, real systemd operation, Raspberry Pi hardware,
-  and any actual Grok invocation.
+Turn Python functions into gadgets your Grok Bot can call through the
+[Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway). Start with a
+software lamp; add your hardware code later. Experimental alpha: Grok Bot and hardware are
+not verified yet. See the [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
 
 ## Quickstart
 
-**1. Install from source.** Use Git and [uv](https://docs.astral.sh/uv/getting-started/installation/).
-Packages are not published yet. Clone the two repositories side by side:
+Needs Git and [uv](https://docs.astral.sh/uv/getting-started/installation/). Packages are
+not on PyPI yet.
 
 ```sh
-git clone https://github.com/adidshaft/grok-gadgets-gateway.git
 git clone https://github.com/adidshaft/grok-gadgets-linux-sdk.git
 cd grok-gadgets-linux-sdk
-uv venv --python 3.11 .venv
-uv pip install --python .venv/bin/python . ../grok-gadgets-gateway
+uv sync --extra gateway
 ```
 
-If you already have both checkouts, run only the last two commands from this SDK's root.
-
-**2. Define your gadget.** Save this as `my_gadget.py` in this SDK's root:
+Save this as `my_gadget.py`:
 
 ```python
-from grok_gadgets_linux import Device
+from grok_gadgets_linux import Gadget
+
+lamp = Gadget("desk-lamp", "Desk lamp", state={"on": False})
 
 
-def create():
-    device = Device("my-pi", "My lamp", simulated=True, state={"on": False})
-
-    def set_lamp(arguments):  # Replace with your GPIO code; it runs in a thread.
-        return {"on": arguments["on"]}
-
-    schema = {"type": "object", "properties": {"on": {"type": "boolean"}}, "required": ["on"]}
-    device.capability("lamp.set", set_lamp, schema=schema)
-    return device
+@lamp.command("Turn the desk lamp on or off")
+def set_light(on: bool) -> dict:
+    # Your hardware code goes here, for example gpio.write(17, on).
+    return {"on": on}
 ```
 
-**3. Start the gateway and agent.** In the first terminal, from this SDK's root:
+Run it:
 
 ```sh
-.venv/bin/grok-gadgets-gateway init
-.venv/bin/grok-gadgets-gateway serve
+uv run grok-linux-agent dev ./my_gadget.py
 ```
 
-Keep that terminal open. In a second terminal, change to the same SDK directory and run:
-
-```sh
-export "$(.venv/bin/grok-gadgets-gateway enroll my-pi)"
-.venv/bin/grok-linux-agent --factory-file ./my_gadget.py:create
-```
-
-The `export` command stores the new device token in this shell without displaying it.
-Enroll once; on later runs, load the saved token privately. `init` creates the separate
-MCP bearer token needed by `serve`. Neither token is a Grok account password.
-
-The agent prints `Agent starting; software simulation`. A local MCP client can now
-list `my-pi` and call `lamp.set` through `http://127.0.0.1:8766/mcp`, using the HTTP
-settings printed by `init`. See [client setup](docs/operation.md#connect-a-local-mcp-client).
-The gateway reports software state; no physical lamp changes. Set `simulated=False`
-only when your handler controls hardware. Button events do not wake Grok Bot.
+`dev` starts a local gateway, connects your gadget with no token to copy, and prints MCP
+client settings. Call `set.light` from any MCP client, for example
+[MCP Inspector](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/first-success.md).
 
 ## Details
 
-- [Develop a gadget](docs/development.md): handlers, plain vs. async functions, GPIO
-  example, events, state limits, shutdown hooks and retries.
+- [Develop a gadget](docs/development.md): the decorator API, plain vs. async functions, GPIO,
+  events, state limits, shutdown hooks and the original `Device` API.
+- Run beside a long-running `grok-gadgets-gateway serve` instead of `dev`:
+  `grok-gadgets-gateway enroll desk-lamp --token-file desk-lamp.token`, then
+  `grok-linux-agent --factory-file ./my_gadget.py --token-file desk-lamp.token`.
 - [Run and recover](docs/operation.md): MCP client setup, systemd user service,
   reconnect limits and exit codes.
 - [Security](SECURITY.md): trust model and known limits.
@@ -137,9 +108,9 @@ The agent prints `Agent stopped (<code>). <hint>` and exits with a distinct code
 
 | Exit | Meaning | Next step |
 | --- | --- | --- |
-| 2 | Configuration (`token_missing`, `factory_error`, ...) | Set `GROK_GADGETS_DEVICE_TOKEN`; use `--factory-file ./my_gadget.py:create` and install its dependencies |
+| 2 | Configuration (`token_missing`, `factory_error`, ...) | Use `grok-linux-agent dev ./my_gadget.py`, or set `--token-file` / `GROK_GADGETS_DEVICE_TOKEN`; install the gadget's dependencies |
 | 3 | `unauthorized` or `revoked` | Check the device ID and token; see [token recovery](docs/operation.md#recover-a-device-token) |
-| 4 | Protocol contract, for example `frame_too_large` | Shorten schemas, descriptions or state (2048-byte frames) |
+| 4 | Protocol contract, for example `frame_too_large` | Shorten schemas, descriptions or state (16 KiB hello, 2048-byte other frames) |
 | 5 | `reconnect_exhausted` | Start the gateway, or use `--retry-forever` |
 
 `GROK_DEVICE_TOKEN` still works but is deprecated. Without `GROK_GATEWAY_SOURCE`, seven

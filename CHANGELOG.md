@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `grok-linux-agent dev ./my_gadget.py` runs your gadget with an in-process gateway and loopback auto-trust: no tokens to copy. It prints pasteable MCP settings (stdio needs no token at all). Needs the new `[gateway]` extra (`uv sync --extra gateway`; the gateway comes from its GitHub repository until it is on PyPI).
+- `--token-file <path>` reads a private device token and re-reads it on every connection, so `grok-gadgets-gateway enroll <id> --rotate --token-file <path>` needs no agent restart. `--factory-file` accepts a plain gadget file.
+- README: the quick start is one install, one ten-line file and one command.
 - New decorator API: `Gadget(...)` with `@gadget.command("What it does")`. The JSON schema comes from type hints (`bool`, `int`, `float`, `str`, `Literal`, `list`, optional, `Annotated` with `Range`). `Device.capability` keeps working and gains `description=`; `event_capability` too.
 - Capability descriptions reach the assistant (gateway `capability_descriptions`). A TCP hello may be up to 16 KiB; other frames stay 2048 bytes. Protocol README re-pinned from gateway `3e41aec`.
 - Re-pin the protocol 0.1.0 README from gateway `c568c3e` (sections and `late_ack`; wire format unchanged). With `GROK_GATEWAY_SOURCE`, a test checks the copied protocol files match that gateway.

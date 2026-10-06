@@ -61,7 +61,8 @@ class Agent:
             raise ValueError("Backoff must be positive and capped at 60 seconds")
         if not 0 < request_timeout <= 10 or not 0 < handler_timeout <= 10:
             raise ValueError("Timeouts must be positive and at most 10 seconds")
-        device.hello(token)  # Validate descriptor, credential shape and frame before connecting.
+        # `token` may be a callable (for example a --token-file reader), read on each connect.
+        device.hello(token() if callable(token) else token)  # Validate before connecting.
         self.device, self.token = device, token
         self.host, self.port = host, port
         self.poll_interval = poll_interval
@@ -122,7 +123,8 @@ class Agent:
             asyncio.open_connection(self.host, self.port, limit=MAX_FRAME), self.request_timeout
         )
         try:
-            hello = await self.exchange(reader, writer, self.device.hello(self.token))
+            token = self.token() if callable(self.token) else self.token
+            hello = await self.exchange(reader, writer, self.device.hello(token))
             if hello.get("protocol_version") != VERSION or not hello.get("session_id"):
                 raise SDKError("protocol_mismatch")
             self.sessions += 1
