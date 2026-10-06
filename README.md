@@ -3,7 +3,8 @@
 Turn Python functions into gadgets your Grok Bot can call through the
 [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway). Start with a
 software lamp; add your hardware code later. Experimental alpha: Grok Bot and hardware are
-not verified yet. See the [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
+not verified yet ([project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix)).
+Independent project, not affiliated with SpaceXAI or xAI.
 
 ## Quickstart
 
@@ -40,100 +41,87 @@ uv run grok-linux-agent dev ./my_gadget.py
 client settings. Call `set.light` from any MCP client, for example
 [MCP Inspector](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/first-success.md).
 
-## Details
-
-- [Develop a gadget](docs/development.md): the decorator API, plain vs. async functions, GPIO,
-  events, state limits, shutdown hooks and the original `Device` API.
-- Run beside a long-running `grok-gadgets-gateway serve` instead of `dev`:
-  `grok-gadgets-gateway enroll desk-lamp --token-file desk-lamp.token`, then
-  `grok-linux-agent --factory-file ./my_gadget.py --token-file desk-lamp.token`.
-- [Run and recover](docs/operation.md): MCP client setup, systemd user service,
-  reconnect limits and exit codes.
-- [Security](SECURITY.md): trust model and known limits.
-- [Contributing](CONTRIBUTING.md), [support](SUPPORT.md) and
-  [GitHub Issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues).
-
-Documentation uses an [ASD-STE100-inspired writing guide](https://github.com/adidshaft/grok-gadgets/blob/main/docs/contributing/writing-guide.md). Formal compliance is not claimed.
-
-### How it fits together
+## How it works
 
 ```mermaid
 flowchart LR
-    A["Your functions"] --> S["SDK agent"]
-    S <-->|"Loopback TCP 127.0.0.1:8765"| G["Gateway"]
-    C["Local MCP client"] -->|"Authenticated HTTP or stdio"| G
-    B["Cloud Grok Bot"] -.->|"Your authenticated HTTPS tunnel (unverified)"| G
+    A["Your Python functions"] --> S["SDK agent"]
+    S <-->|"127.0.0.1:8765"| G["Gateway"]
+    C["MCP client"] --> G
+    B["Grok Bot (not connected yet)"] -.-> G
 ```
 
-The SDK implements the device; the gateway routes assistant requests. They are separate
-packages. The agent connects only to loopback (`127.0.0.1` or `::1`), so run it on the
-gateway's computer. The builder runs the gateway; Grok/xAI hosts Grok Bot. A tunnel adds
-reachability, not authentication. See the
-[hosting FAQ](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/hosting.md)
-and `HARD-GROK-REMOTE-001`.
+Your file declares a `Gadget` and its commands. The agent connects it to the
+[gateway](https://github.com/adidshaft/grok-gadgets-gateway) on the same computer, and the
+gateway offers its commands to MCP clients, with your one-line descriptions. `dev` runs both
+in one process. Each command's schema comes from its type hints, so bad arguments are refused
+before your code runs.
 
-Factory files execute trusted local code. Do not execute content from a conversation.
-The SDK checks hashes of its copied [gateway protocol 0.1.0](https://github.com/adidshaft/grok-gadgets-gateway/tree/main/protocol/0.1.0)
-files at import; see [source.json](src/grok_gadgets_linux/protocol/source.json).
+## Add your hardware
 
-### Supported platforms
+Put your GPIO, I2C or serial code inside the command function. Plain functions run in a worker
+thread, so blocking calls are fine; `async def` works too. Return what the device now
+reports. Set `simulated=False` only when your code really controls hardware.
 
-Python 3.11 or later. Hosted CI runs 3.11, 3.12, 3.13 and 3.14 on Ubuntu, including the
-gateway integration tests against gateway `main` and the README quick start, nightly too.
+```python
+@lamp.command("Set the brightness from 0 to 100", name="level.set")
+def level(level: Annotated[int, Range(0, 100)]) -> dict:
+    pwm.duty(level)
+    return {"level": level}
+```
 
-| Raspberry Pi | OS architecture | Dependency wheels |
-| --- | --- | --- |
-| Pi 5, Pi 4, Pi 3, Zero 2 W | aarch64 (64-bit OS) or armv7l (32-bit OS) | Available on PyPI |
-| Pi Zero, Zero W, Pi 1 | armv6l | `rpds-py` (through `jsonschema`) has no PyPI wheel. Use a piwheels build if one exists (not checked), or install a Rust toolchain so pip can build it |
+Events, shutdown hooks, the original `Device` API and limits are in the
+[developer guide](docs/development.md).
 
-No Raspberry Pi was used to test this SDK.
+## Run it as a service
 
-### Evidence
+Next to a long-running `grok-gadgets-gateway serve`, give the gadget its own token:
 
-| Path | Evidence | Remaining limit |
-| --- | --- | --- |
-| macOS arm64, CPython 3.11.15, 3.12.13, 3.13.15, 3.14.7 | Unit, CLI, shipped-unit `ExecStart` (no systemd) and gateway-source integration tests, 5 October 2026 | Not Linux |
-| Linux aarch64 container, CPython 3.11.17 | Linux container software acceptance (partial): installed-wheel tests with gateway integration, 5 October 2026 | A non-container Linux host; other distributions; real service and peripherals |
-| Windows / Intel Mac | Not verified | Installation and runtime checks |
-| Grok Bot / mobile | Not verified | Supported route to the gateway |
-| systemd / peripherals | Template and APIs supplied; not operated | Authorized host and peripheral observations |
+```sh
+grok-gadgets-gateway enroll desk-lamp --token-file desk-lamp.token
+grok-linux-agent --factory-file ./my_gadget.py --token-file desk-lamp.token
+```
 
-[Launch verification](docs/verification/launch-docs.md) and the
-[historical Linux record](docs/verification.md) keep the exact boundaries. A Mac test
-never establishes Linux peripheral behavior.
+The agent re-reads the token file on every connection, so `enroll --rotate` needs no
+restart. A systemd user unit template, reconnect limits and exit codes are in the
+[operation guide](docs/operation.md) (systemd is not yet verified).
 
-### Troubleshooting
+## Platforms
+
+Python 3.11–3.14. CI runs on Ubuntu every night, including the README quick start and the
+gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have
+PyPI wheels for every dependency; the armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
+toolchain for `rpds-py`. No Raspberry Pi has been tested yet; see the
+[project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
+
+## Troubleshooting
 
 The agent prints `Agent stopped (<code>). <hint>` and exits with a distinct code.
 
 | Exit | Meaning | Next step |
 | --- | --- | --- |
-| 2 | Configuration (`token_missing`, `factory_error`, ...) | Use `grok-linux-agent dev ./my_gadget.py`, or set `--token-file` / `GROK_GADGETS_DEVICE_TOKEN`; install the gadget's dependencies |
+| 2 | Configuration (`token_missing`, `factory_error`, ...) | Use `grok-linux-agent dev ./my_gadget.py`, or set `--token-file`; install the gadget's dependencies |
 | 3 | `unauthorized` or `revoked` | Check the device ID and token; see [token recovery](docs/operation.md#recover-a-device-token) |
 | 4 | Protocol contract, for example `frame_too_large` | Shorten schemas, descriptions or state (16 KiB hello, 2048-byte other frames) |
 | 5 | `reconnect_exhausted` | Start the gateway, or use `--retry-forever` |
 
-`GROK_DEVICE_TOKEN` still works but is deprecated. Without `GROK_GATEWAY_SOURCE`, seven
-gateway integration tests skip locally (CI always runs them); see [CONTRIBUTING](CONTRIBUTING.md).
+Never retry an uncertain physical action with a new command ID: read the state first.
+Gadget files run trusted local code; never run code from a conversation.
 
-Command and event caches are limited and exist only in memory. Never use a new command
-ID to retry an uncertain physical action.
+## Community
 
-When a handler completes but its reported state is too large for a valid ACK, the agent
-keeps the last valid state and acknowledges the command as executed to prevent a retry
-from repeating the side effect. See [issue #8](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/8)
-for the regression and transport acceptance record.
+Show your gadget, ask questions and share ideas on
+[r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/). Report bugs in
+[GitHub Issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues). New here? Pick a
+[good first issue](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+and read [CONTRIBUTING](CONTRIBUTING.md). Help: [SUPPORT](SUPPORT.md). Security:
+[SECURITY](SECURITY.md). Keep tokens and household details out of public posts.
 
-### Help and license
+## License and affiliation
 
-Use [SUPPORT](SUPPORT.md), [SECURITY](SECURITY.md), and
-[CODE_OF_CONDUCT](CODE_OF_CONDUCT.md). Do not post tokens, household data, private events,
-or account captures.
-
-Original code and copied protocol artifacts are [Apache-2.0](LICENSE).
-Retain [NOTICE](NOTICE) and dependency licenses. This independent project is exclusively
-for Grok Bot and is not affiliated with xAI.
-
-### History note
-
-Pre-publication commit dates were reconstructed across 29 September–5 October 2026 at the owner’s request. Verification records retain their actual execution dates. See the [history and privacy record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
+Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
+open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
+xAI**, which make Grok and Grok Bot. Pre-publication commit dates were reconstructed; see the
+[history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
+Detailed verification records: [launch verification](docs/verification/launch-docs.md) and
+[historical record](docs/verification.md).
