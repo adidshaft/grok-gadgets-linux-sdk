@@ -4,8 +4,28 @@ version = "0.1.0a1"
 description = "Capability SDK and loopback agent for Grok Gadgets"
 requires-python = ">=3.11"
 license = "Apache-2.0"
+readme = "README.md"
+authors = [{ name = "adidshaft" }]
+keywords = ["mcp", "grok", "gadgets", "iot", "raspberry-pi"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Home Automation",
+]
 dependencies = ["jsonschema==4.26.0"]
 
+
+[project.urls]
+Homepage = "https://grok-gadgets.pages.dev/"
+Source = "https://github.com/adidshaft/grok-gadgets-linux-sdk"
+Issues = "https://github.com/adidshaft/grok-gadgets-linux-sdk/issues"
+Changelog = "https://github.com/adidshaft/grok-gadgets-linux-sdk/blob/main/CHANGELOG.md"
 [project.scripts]
 grok-linux-agent = "grok_gadgets_linux.cli:main"
 
