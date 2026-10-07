@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.2 — 7 October 2026
+
+- Pin the gateway extra and lockfile to gateway v0.1.0-alpha.2.
+- Add a runnable Grok Bot rehearsal step to the README quick start.
+
 ## 0.1.0a1 — 6 October 2026
 
 - Pin the gateway dependency to its `v0.1.0-alpha.1` release tag.

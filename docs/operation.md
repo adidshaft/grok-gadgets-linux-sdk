@@ -3,7 +3,7 @@
 The agent connects only to loopback TCP: `127.0.0.1` or `::1`. The default port is 8765. Run the agent and gateway on the same host.
 
 Local simulation needs no public hosting. You operate the gateway and agent on this host.
-Grok/xAI hosts Grok Bot; it does not host these processes for you.
+SpaceXAI hosts Grok Bot; it does not host these processes for you.
 
 The gateway has local stdio MCP and authenticated HTTP MCP through
 `grok-gadgets-gateway serve`. `serve` keeps running on its own. Both modes

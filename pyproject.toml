@@ -1,6 +1,6 @@
 [project]
 name = "grok-gadgets-linux-sdk"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Capability SDK and loopback agent for Grok Gadgets"
 requires-python = ">=3.11"
 license = "Apache-2.0"
@@ -22,7 +22,7 @@ dependencies = ["jsonschema==4.26.0"]
 
 [project.optional-dependencies]
 # `grok-linux-agent dev` runs the gateway in-process. The gateway never depends on this SDK.
-gateway = ["grok-gadgets-gateway==0.1.0a1"]
+gateway = ["grok-gadgets-gateway==0.1.0a2"]
 
 [project.urls]
 Homepage = "https://grok-gadgets.pages.dev/"
@@ -48,4 +48,4 @@ line-length = 100
 
 [tool.uv.sources]
 # Until the gateway is on PyPI, the extra comes from its public repository.
-grok-gadgets-gateway = { git = "https://github.com/adidshaft/grok-gadgets-gateway", tag = "v0.1.0-alpha.1" }
+grok-gadgets-gateway = { git = "https://github.com/adidshaft/grok-gadgets-gateway", tag = "v0.1.0-alpha.2" }
