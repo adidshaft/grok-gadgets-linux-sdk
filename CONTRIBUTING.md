@@ -10,10 +10,14 @@ The hub owns [shared contribution policy](https://github.com/adidshaft/grok-gadg
 
 ## Standalone checks
 
-Use Python 3.11 or later and uv. CI runs the same sequence on Python 3.11, 3.12, 3.13 and 3.14. Fork the repository and clone your fork. From the SDK root, run:
+Use Python 3.11 or later and uv. CI runs the same sequence on Python 3.11, 3.12, 3.13 and 3.14. Fork the repository and clone your fork. A fork can hold only `main`, so start your branch from the upstream `dev`:
 
 ```sh
-git switch -c docs/clearer-device-example
+git clone https://github.com/YOUR_ACCOUNT/grok-gadgets-linux-sdk.git
+cd grok-gadgets-linux-sdk
+git remote add upstream https://github.com/adidshaft/grok-gadgets-linux-sdk.git
+git fetch upstream dev
+git switch -c docs/LIN-123-clearer-device-example upstream/dev
 uv sync --frozen --extra gateway --python 3.11
 uv run ruff check .
 uv run ruff format --check .
@@ -52,6 +56,8 @@ their own authorized Linux/hardware observations.
 ## Branches
 
 Branch from `dev` and open your PR into `dev` for integration, development and testing; PRs into `dev` are squash-merged when checks pass. `main` is the default branch for users, builders and the website, holds tagged releases, and changes only through release or hotfix PRs. Name branches `<type>/<ISSUE-ID>-<short-slug>`, for example `fix/LIN-021-short-name`. The shared [branch and release policy](https://github.com/adidshaft/grok-gadgets/blob/main/CONTRIBUTING.md#branches-and-releases) covers releases, hotfixes and cross-repository changes.
+
+Push the branch to your fork and open the PR into `adidshaft/grok-gadgets-linux-sdk` `dev`. The GitHub PR form selects `main` by default. Change the base branch to `dev`, because the PR-target check rejects other PRs into `main`.
 
 ## Review and credit
 
