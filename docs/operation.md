@@ -3,10 +3,10 @@
 The agent connects only to loopback TCP: `127.0.0.1` or `::1`. The default port is 8765. Run the agent and gateway on the same host.
 
 Local simulation needs no public hosting. You operate the gateway and agent on this host.
-Grok/xAI hosts Grok Bot; it does not host these processes for you.
+SpaceXAI hosts Grok Bot; it does not host these processes for you.
 
 The gateway has local stdio MCP and authenticated HTTP MCP through
-`grok-gadgets-gateway serve`. `serve` keeps running without an MCP client. Both modes
+`grok-gadgets-gateway serve`. `serve` keeps running on its own. Both modes
 can run the loopback device listener. Never tunnel the device port.
 A tunnel adds reachability. It does not add authentication.
 `HARD-GROK-REMOTE-001` tracks the remote route.
@@ -16,8 +16,8 @@ for the future cloud route and product hosting choices.
 ## Start the agent
 
 For development, `grok-linux-agent dev ./my_gadget.py` is all you need: it starts a gateway in
-the same process, trusts your gadget on loopback and prints MCP client settings. Add `--stdio`
-when an MCP client should start it; that path needs no token at all.
+the same process, trusts your gadget on loopback and prints connector settings. Add `--stdio`
+when the connector should start it; that path needs no token at all.
 
 To run beside a long-running gateway service instead:
 
@@ -28,14 +28,14 @@ To run beside a long-running gateway service instead:
 3. Start the gateway: `grok-gadgets-gateway serve`.
 4. Run `grok-linux-agent --factory-file ./my_gadget.py --token-file desk-lamp.token`.
    `GROK_GADGETS_DEVICE_TOKEN` also works; `GROK_DEVICE_TOKEN` is deprecated.
-5. Request device capabilities through gateway MCP.
+5. Check it: `grok-gadgets-gateway rehearse --device desk-lamp --command <name> --args '<json>'`.
 
 The default agent is a software lamp. Add `--simulate-button` to queue simulated press and release events. Use `--factory-file ./my_gadget.py` (one module-level `Gadget`, or `path.py:function`) or `--factory module:function` for a trusted application. Use `--port` for a different loopback port.
 
-### Connect a local MCP client
+### Connector settings
 
-For the running `serve` process in the quickstart, use a client that supports
-Streamable HTTP and an `Authorization` header:
+Grok Bot's custom MCP connector uses Streamable HTTP with an `Authorization` header. For the
+running `serve` process in the quickstart, the settings are:
 
 ```json
 {
@@ -51,11 +51,11 @@ Streamable HTTP and an `Authorization` header:
 Replace `<mcp-token>` privately with the single line from
 `~/.config/grok-gadgets/mcp-token`. If you set `XDG_CONFIG_HOME`, use that directory
 instead of `~/.config`. This is the MCP token, not the device token. Keep the settings
-private. Exact client settings depend on the client; Grok Bot cannot open this URL.
+private. Grok Bot cannot open this loopback URL yet; check it locally with `grok-gadgets-gateway rehearse`.
 
-Alternatively, stop `serve` and let a local MCP client start the gateway over stdio.
+Alternatively, stop `serve` and let the connector start the gateway over stdio.
 Do not start both modes on the same device port. Use absolute paths. The listener on
-`--device-port` runs while the client keeps the gateway running:
+`--device-port` runs while the connector keeps the gateway running:
 
 ```json
 {
@@ -72,7 +72,7 @@ Do not start both modes on the same device port. Use absolute paths. The listene
 ```
 
 The credential file must have mode `600`. A cloud Grok Bot cannot start this command on
-your computer. This snippet is not verified with a specific MCP client.
+your computer. This snippet is not verified with Grok Bot.
 
 SDK integration tests start `DeviceServer` directly on temporary loopback ports. They do not use a paid API call or a live Grok account.
 

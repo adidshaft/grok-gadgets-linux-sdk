@@ -4,7 +4,7 @@ Turn Python functions into gadgets your Grok Bot can call through the
 [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway). Start with a
 software lamp; add your hardware code later. Experimental alpha: Grok Bot and hardware are
 not verified yet ([project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix)).
-Independent project, not affiliated with SpaceXAI or xAI.
+Independent project, not affiliated with SpaceXAI.
 
 ## Quickstart
 
@@ -37,9 +37,12 @@ Run it:
 uv run grok-linux-agent dev ./my_gadget.py
 ```
 
-`dev` starts a local gateway, connects your gadget with no token to copy, and prints MCP
-client settings. Call `set.light` from any MCP client, for example
-[MCP Inspector](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/first-success.md).
+`dev` starts a local gateway, connects your gadget with no token to copy, and prints the
+connector settings Grok Bot will use. Run the local rehearsal:
+
+```sh
+uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"on": true}'
+```
 
 ## How it works
 
@@ -47,15 +50,14 @@ client settings. Call `set.light` from any MCP client, for example
 flowchart LR
     A["Your Python functions"] --> S["SDK agent"]
     S <-->|"127.0.0.1:8765"| G["Gateway"]
-    C["MCP client"] --> G
-    B["Grok Bot (not connected yet)"] -.-> G
+    B["Grok Bot (connection in progress)"] -.-> G
+    R["rehearse (local check)"] --> G
 ```
 
 Your file declares a `Gadget` and its commands. The agent connects it to the
 [gateway](https://github.com/adidshaft/grok-gadgets-gateway) on the same computer, and the
-gateway offers its commands to MCP clients, with your one-line descriptions. `dev` runs both
-in one process. Each command's schema comes from its type hints, so bad arguments are refused
-before your code runs.
+gateway offers its commands to Grok Bot, with your one-line descriptions. `dev` runs both
+in one process. Each command's schema comes from its type hints, so the SDK refuses bad arguments before your code runs.
 
 ## Add your hardware
 
@@ -94,9 +96,8 @@ restart. A systemd user unit template, reconnect limits and exit codes are in th
 ## Platforms
 
 Python 3.11–3.14. CI runs on Ubuntu every night, including the README quick start and the
-gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have
-PyPI wheels for every dependency; the armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
-toolchain for `rpds-py`. No Raspberry Pi has been tested yet; see the
+gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have PyPI wheels for every dependency. The armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
+toolchain for `rpds-py`. Nobody has tested a Raspberry Pi yet; see the
 [project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
 
 ## Troubleshooting
@@ -126,8 +127,7 @@ Contribute on the `dev` branch; `main` holds tagged stable releases ([branches](
 ## License and affiliation
 
 Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Grok Gadgets is an independent
-open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI or
-xAI**, which make Grok and Grok Bot. Pre-publication commit dates were reconstructed; see the
+open-source project. It is **not affiliated with, endorsed by or sponsored by SpaceXAI**. We reconstructed the pre-publication commit dates; see the
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
 Detailed verification records: [launch verification](docs/verification/launch-docs.md) and
 [historical record](docs/verification.md).
