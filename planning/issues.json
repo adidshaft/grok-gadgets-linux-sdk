@@ -296,7 +296,7 @@
     "id": "REVIEW-LIN-003",
     "repository": "grok-gadgets-linux-sdk",
     "owner": "grok-gadgets-linux-sdk",
-    "problem": "Custom event names are advertised to MCP clients as callable commands (review LIN-07)",
+    "problem": "Custom event names are advertised to Grok Bot as callable commands (review LIN-07)",
     "acceptance": [
       "event_capability(name) sends the inline schema {type: object, x-grok-gadgets-kind: event} for custom names",
       "button stays the built-in event; history_lost is reserved; neither can be a command",
@@ -465,10 +465,10 @@
     "id": "REVIEW-LIN-009",
     "repository": "grok-gadgets-linux-sdk",
     "owner": "grok-gadgets-linux-sdk",
-    "problem": "Docs overclaim evidence, name the demo as a listener, lack an MCP client recipe, Pi support notes and the one-way auth threat (review LIN-06, LIN-13, LIN-14, LIN-16, LIN-17)",
+    "problem": "Docs overclaim evidence, name the demo as a listener, lack a connector recipe, Pi support notes and the one-way auth threat (review LIN-06, LIN-13, LIN-14, LIN-16, LIN-17)",
     "acceptance": [
       "README starts in plain language with an honest Grok Bot status and a 3-step quickstart",
-      "operation.md drops the local-demo listener claim and adds an MCP client config snippet",
+      "operation.md drops the local-demo listener claim and adds a connector config snippet",
       "Evidence labels say 'Linux container software acceptance (partial)'; stale commit and CI statements updated",
       "Supported Raspberry Pi models documented, including the armv6l rpds-py fallback",
       "SECURITY.md documents one-way authentication; mutual authentication is deferred to protocol 0.2"
