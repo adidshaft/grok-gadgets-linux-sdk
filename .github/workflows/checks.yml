@@ -43,7 +43,7 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - name: Plain language (ASD-STE100 sentence limit)
-        run: python3 scripts/check_ste.py README.md
+        run: python3 scripts/check_ste.py README.md CONTRIBUTING.md SUPPORT.md
       - name: Unit and gateway-main integration tests
         run: |
           git -C ../grok-gadgets-gateway log -1 --format='Gateway main %H'
