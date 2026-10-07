@@ -55,7 +55,7 @@ def _settings(path, url, token_file):
         }
     }
     return (
-        "# Your MCP client starts this gadget itself (no token at all):\n"
+        "# The connector starts this gadget itself (no token at all):\n"
         + json.dumps(stdio, indent=2)
         + "\n# Or connect to this running process over HTTP:\n"
         + json.dumps(http, indent=2)
@@ -98,8 +98,9 @@ async def _http(device, path, port, gateway_parts):
             print(
                 f"Gadget {device.device_id} is connected to a local gateway at {running.url}\n"
                 + _settings(path, running.url, token_file)
-                + "\nTry it without a model: "
-                "https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/first-success.md"
+                + "\nRehearse the Grok Bot call: grok-gadgets-gateway rehearse --device "
+                + device.device_id
+                + " --command <name> --args '<json>'"
                 "\nPress Ctrl+C to stop.",
                 file=sys.stderr,
                 flush=True,
@@ -141,7 +142,9 @@ def main(argv):
     )
     parser.add_argument("gadget", help="your trusted gadget file, for example ./my_gadget.py")
     parser.add_argument(
-        "--stdio", action="store_true", help="serve MCP on stdin/stdout for a client that starts it"
+        "--stdio",
+        action="store_true",
+        help="serve MCP on stdin/stdout for a connector that starts it",
     )
     parser.add_argument("--port", type=int, default=8766, help="loopback MCP HTTP port")
     args = parser.parse_args(argv)

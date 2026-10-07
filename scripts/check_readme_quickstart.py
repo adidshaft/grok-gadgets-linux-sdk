@@ -142,7 +142,7 @@ def main():
             if result.returncode:
                 raise SystemExit(result.stdout + result.stderr)
             outcome = json.loads(result.stdout.strip().splitlines()[-1])
-            check(DEVICE in outcome["devices"], f"the MCP client lists {DEVICE}")
+            check(DEVICE in outcome["devices"], f"the gateway lists {DEVICE} for Grok Bot")
             check(outcome["description"], f"{CAPABILITY} has a description for the model")
             check(outcome["status"] == "executed", f"{CAPABILITY} reaches executed")
             check(outcome["state"] == STATE, f"reported state is {STATE}")
