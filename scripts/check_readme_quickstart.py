@@ -25,12 +25,17 @@ LONG_RUNNING = ("grok-gadgets-gateway serve", "grok-linux-agent")
 DEVICE, CAPABILITY, ARGUMENTS, STATE = "desk-lamp", "set.light", {"on": True}, {"on": True}
 CLIENT = r"""
 import asyncio, json, sys
+import httpx2
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 async def main(url, token):
     headers = {"Authorization": "Bearer " + token}
-    async with streamablehttp_client(url, headers=headers) as (read, write, _):
+    timeout = httpx2.Timeout(30.0, read=300.0)  # the MCP SDK's default timeouts
+    async with (
+        httpx2.AsyncClient(headers=headers, timeout=timeout) as http,
+        streamable_http_client(url, http_client=http) as (read, write),
+    ):
         async with ClientSession(read, write) as session:
             await session.initialize()
 
