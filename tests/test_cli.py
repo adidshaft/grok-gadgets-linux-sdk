@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fake_gateway import FakeGateway, bounded, error
+
 from grok_gadgets_linux.cli import FactoryError, _token, load_device_file, load_factory, main
 
 
@@ -107,9 +108,11 @@ def create():
 
     def test_cli_reports_category_without_private_input(self):
         errors = io.StringIO()
-        with patch.object(sys, "argv", ["grok-linux-agent", "--factory", "PRIVATE_TOKEN:create"]):
-            with contextlib.redirect_stderr(errors):
-                self.assertEqual(main(), 2)
+        with (
+            patch.object(sys, "argv", ["grok-linux-agent", "--factory", "PRIVATE_TOKEN:create"]),
+            contextlib.redirect_stderr(errors),
+        ):
+            self.assertEqual(main(), 2)
         self.assertIn("Agent stopped (factory_error).", errors.getvalue())
         self.assertIn("install it or use --factory-file", errors.getvalue())
         self.assertNotIn("PRIVATE_TOKEN", errors.getvalue())
@@ -121,9 +124,11 @@ def create():
         ):
             self.assertEqual(_token(), new)
         errors = io.StringIO()
-        with patch.dict(os.environ, {"GROK_DEVICE_TOKEN": legacy}, clear=True):
-            with contextlib.redirect_stderr(errors):
-                self.assertEqual(_token(), legacy)
+        with (
+            patch.dict(os.environ, {"GROK_DEVICE_TOKEN": legacy}, clear=True),
+            contextlib.redirect_stderr(errors),
+        ):
+            self.assertEqual(_token(), legacy)
         self.assertIn("GROK_DEVICE_TOKEN is deprecated", errors.getvalue())
         self.assertNotIn(legacy, errors.getvalue())
 

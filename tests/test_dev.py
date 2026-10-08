@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest import mock
 
 from fake_gateway import bounded
+
 from grok_gadgets_linux import Gadget, SDKError
 from grok_gadgets_linux.cli import FactoryError, _token_file, load_device_file
 
@@ -64,9 +65,11 @@ class LoadingTests(unittest.TestCase):
     def test_missing_gateway_names_the_install_command(self):
         from grok_gadgets_linux import dev
 
-        with mock.patch.dict(sys.modules, {"grok_gadgets_gateway": None}):
-            with self.assertRaises(SystemExit) as caught:
-                dev._gateway()
+        with (
+            mock.patch.dict(sys.modules, {"grok_gadgets_gateway": None}),
+            self.assertRaises(SystemExit) as caught,
+        ):
+            dev._gateway()
         self.assertIn("grok-gadgets-linux-sdk[gateway]", str(caught.exception))
 
 
@@ -87,32 +90,31 @@ class DevStdioTests(unittest.IsolatedAsyncioTestCase):
                 args=["-m", "grok_gadgets_linux.cli", "dev", "--stdio", str(gadget)],
                 env=environment,
             )
-            async with stdio_client(params) as (read, write):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
+            async with stdio_client(params) as (read, write), ClientSession(read, write) as session:
+                await session.initialize()
 
-                    async def call(name, **arguments):
-                        result = await session.call_tool(name, arguments)
-                        return json.loads(result.content[0].text)
+                async def call(name, **arguments):
+                    result = await session.call_tool(name, arguments)
+                    return json.loads(result.content[0].text)
 
-                    for _ in range(100):
-                        devices = (await call("gadgets_list_devices"))["devices"]
-                        if devices:
-                            break
-                        await asyncio.sleep(0.05)
-                    self.assertEqual(
-                        devices[0]["capability_descriptions"]["set.light"],
-                        "Turn the desk lamp on or off",
+                for _ in range(100):
+                    devices = (await call("gadgets_list_devices"))["devices"]
+                    if devices:
+                        break
+                    await asyncio.sleep(0.05)
+                self.assertEqual(
+                    devices[0]["capability_descriptions"]["set.light"],
+                    "Turn the desk lamp on or off",
+                )
+                command = (
+                    await call(
+                        "gadgets_command",
+                        device_id="desk-lamp",
+                        capability="set.light",
+                        arguments={"on": True},
                     )
-                    command = (
-                        await call(
-                            "gadgets_command",
-                            device_id="desk-lamp",
-                            capability="set.light",
-                            arguments={"on": True},
-                        )
-                    )["command"]
-                    self.assertEqual(command["status"], "executed")
-                    self.assertEqual(command["reported_state"], {"on": True})
+                )["command"]
+                self.assertEqual(command["status"], "executed")
+                self.assertEqual(command["reported_state"], {"on": True})
             # Nothing was written to the user's gateway config in stdio mode.
             self.assertFalse((Path(folder) / "grok-gadgets").exists())

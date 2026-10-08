@@ -25,12 +25,17 @@ LONG_RUNNING = ("grok-gadgets-gateway serve", "grok-linux-agent")
 DEVICE, CAPABILITY, ARGUMENTS, STATE = "desk-lamp", "set.light", {"on": True}, {"on": True}
 CLIENT = r"""
 import asyncio, json, sys
+import httpx2
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 async def main(url, token):
     headers = {"Authorization": "Bearer " + token}
-    async with streamablehttp_client(url, headers=headers) as (read, write, _):
+    timeout = httpx2.Timeout(30.0, read=300.0)  # the MCP SDK's default timeouts
+    async with (
+        httpx2.AsyncClient(headers=headers, timeout=timeout) as http,
+        streamable_http_client(url, http_client=http) as (read, write),
+    ):
         async with ClientSession(read, write) as session:
             await session.initialize()
 
@@ -73,7 +78,7 @@ asyncio.run(main(sys.argv[1], sys.argv[2]))
 def blocks():
     readme = (ROOT / "README.md").read_text()
     section = readme.split("## Quickstart", 1)[1].split("\n## ", 1)[0]
-    return re.findall(r"```(sh|python)\n(.*?)```", section, re.S)
+    return re.findall(r"```(sh|python)\n(.*?)```", section, re.DOTALL)
 
 
 def wait_for_port(port, seconds=60):
@@ -138,6 +143,7 @@ def main():
                 capture_output=True,
                 text=True,
                 timeout=120,
+                check=False,
             )
             if result.returncode:
                 raise SystemExit(result.stdout + result.stderr)
