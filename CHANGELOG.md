@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Pin the gateway extra and lockfile to gateway v0.1.0-alpha.4, which uses `mcp` 2.3.0. The README quick-start check uses the `mcp` 2.x HTTP client.
 - Development tools: `ruff` 0.16.10 and `hatchling` 1.32.4. Code follows the new `ruff` default rules without behavior changes. CI checks packages with `twine` 7.0.0, which reads the Metadata-Version 2.5 that `hatchling` 1.32 writes.
 
 ## 0.1.0-alpha.3 — 8 October 2026
