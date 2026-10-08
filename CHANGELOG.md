@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.3 — 8 October 2026
+
+- Security: pin the gateway extra and lockfile to gateway v0.1.0-alpha.3. This moves `mcp` from 1.26.0 to 1.28.1 and closes its high-severity Dependabot alerts.
+- Dependabot opens weekly grouped update PRs into `dev`.
+- CONTRIBUTING starts fork branches from `upstream/dev`. CI also runs the plain-language check on CONTRIBUTING and SUPPORT.
+
 ## 0.1.0-alpha.2 — 7 October 2026
 
 - Pin the gateway extra and lockfile to gateway v0.1.0-alpha.2.
