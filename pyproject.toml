@@ -1,6 +1,6 @@
 [project]
 name = "grok-gadgets-linux-sdk"
-version = "0.1.0a3"
+version = "0.1.0a4"
 description = "Capability SDK and loopback agent for Grok Gadgets"
 requires-python = ">=3.11"
 license = "Apache-2.0"
