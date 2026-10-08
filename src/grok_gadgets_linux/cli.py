@@ -10,10 +10,9 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-from .device import Device
-
 from .agent import Agent
 from .contracts import SDKError
+from .device import Device
 
 
 class FactoryError(Exception):
@@ -71,7 +70,7 @@ def load_factory(factory, *, file=False):
     else:
         try:
             module = importlib.import_module(location)
-        except Exception:
+        except Exception:  # noqa: BLE001 - report a fixed category, never user code errors
             raise FactoryError(
                 "Factory module could not load; install it or use --factory-file."
             ) from None
@@ -80,7 +79,7 @@ def load_factory(factory, *, file=False):
         raise FactoryError("Factory function unavailable; expose a callable returning Device.")
     try:
         device = creator()
-    except Exception:
+    except Exception:  # noqa: BLE001 - report a fixed category, never user code errors
         raise FactoryError("Factory function failed; inspect trusted code privately.") from None
     if not isinstance(device, Device):
         raise FactoryError("Factory must return a grok_gadgets_linux.Device.")
@@ -96,8 +95,10 @@ EXIT_OK, EXIT_INTERNAL, EXIT_CONFIG, EXIT_AUTH, EXIT_CONTRACT, EXIT_RECONNECT = 
 _HINTS = {
     "token_missing": (
         EXIT_CONFIG,
-        f"Set {TOKEN_ENV} or --token-file; get one with grok-gadgets-gateway enroll <device-id>"
-        " (or try: grok-linux-agent dev ./my_gadget.py, which needs no token).",
+        (
+            f"Set {TOKEN_ENV} or --token-file; get one with grok-gadgets-gateway enroll <device-id>"
+            " (or try: grok-linux-agent dev ./my_gadget.py, which needs no token)."
+        ),
     ),
     "token_invalid": (EXIT_CONFIG, "The device token must have 16 to 256 characters."),
     "token_file_insecure": (EXIT_CONFIG, "Make the token file private: chmod 600 <file>."),
@@ -276,7 +277,7 @@ def main(argv=None):
         return _stopped(error.code)
     except KeyboardInterrupt:
         return EXIT_OK
-    except Exception:
+    except Exception:  # noqa: BLE001 - report a fixed category, never user code errors
         return _stopped("internal_error")
     print("Agent stopped (signal). Handlers were cancelled; shutdown hooks ran.", file=sys.stderr)
     return EXIT_OK

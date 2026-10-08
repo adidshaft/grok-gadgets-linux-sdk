@@ -85,5 +85,5 @@ def validate_inline_schema(schema):
         raise SDKError("schema_reference_forbidden")
     try:
         Draft202012Validator.check_schema(schema)
-    except Exception:
+    except Exception:  # noqa: BLE001 - any schema problem is reported as invalid_schema
         raise SDKError("invalid_schema") from None

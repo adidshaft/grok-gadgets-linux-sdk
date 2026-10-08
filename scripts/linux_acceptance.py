@@ -14,7 +14,7 @@ subprocess.run(
     [sys.executable, "-m", "pip", "install", "--no-index", "--find-links=/wheels", str(wheel)],
     check=True,
 )
-import grok_gadgets_linux  # noqa: E402
+import grok_gadgets_linux
 
 print(
     json.dumps(

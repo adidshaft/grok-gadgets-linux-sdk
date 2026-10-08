@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fake_gateway import bounded
+
 from grok_gadgets_linux import Agent, Gadget, SDKError
 from grok_gadgets_linux.gadget import Range, schema_from_signature
 
@@ -126,7 +127,7 @@ class GatewayDescriptionTests(unittest.IsolatedAsyncioTestCase):
 
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "credentials.json"
-            path.write_text('{"devices": {"lamp-1": {"token": "%s"}}}' % TOKEN)
+            path.write_text('{"devices": {"lamp-1": {"token": "' + TOKEN + '"}}}')
             path.chmod(0o600)
             gateway = Gateway()
             server = await DeviceServer(gateway, Credentials(path), port=0).start()
@@ -165,6 +166,7 @@ class TokenFileRotationTests(unittest.IsolatedAsyncioTestCase):
         from grok_gadgets_gateway.domain import Gateway
         from grok_gadgets_gateway.operator import enroll, write_token_file
         from grok_gadgets_gateway.transport import Credentials, DeviceServer
+
         from grok_gadgets_linux.cli import _token_file
 
         with tempfile.TemporaryDirectory() as folder:

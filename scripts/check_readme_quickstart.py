@@ -73,7 +73,7 @@ asyncio.run(main(sys.argv[1], sys.argv[2]))
 def blocks():
     readme = (ROOT / "README.md").read_text()
     section = readme.split("## Quickstart", 1)[1].split("\n## ", 1)[0]
-    return re.findall(r"```(sh|python)\n(.*?)```", section, re.S)
+    return re.findall(r"```(sh|python)\n(.*?)```", section, re.DOTALL)
 
 
 def wait_for_port(port, seconds=60):
@@ -138,6 +138,7 @@ def main():
                 capture_output=True,
                 text=True,
                 timeout=120,
+                check=False,
             )
             if result.returncode:
                 raise SystemExit(result.stdout + result.stderr)
