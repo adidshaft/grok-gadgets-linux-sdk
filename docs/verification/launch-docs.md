@@ -58,4 +58,5 @@ Mac checks do not extend historical Linux aarch64 container evidence to real per
 
 A later host run on a Raspberry Pi 5 is recorded in
 [HUB-HW-001 Raspberry Pi 5](hub-hw-001-raspberry-pi-5.md). That report is loopback SDK
-and simulator evidence on one board. Physical LED/button and Grok Bot were not tested.
+and simulator evidence on one board, plus an operator-confirmed Grok Bot Remote HTTPS
+session against owner-fronted MCP (`:8766` only). Physical LED/button was not tested.

@@ -3,7 +3,7 @@
 Issue: [adidshaft/grok-gadgets#15](https://github.com/adidshaft/grok-gadgets/issues/15)
 
 This report covers **one** host: a Raspberry Pi 5 running the tagged Linux SDK
-against a loopback gateway. It does **not** prove other boards, GPIO, or Grok Bot.
+against a loopback gateway. It does **not** prove other boards or GPIO.
 
 ## Hardware and software
 
@@ -13,10 +13,13 @@ against a loopback gateway. It does **not** prove other boards, GPIO, or Grok Bo
 - Gateway: `grok-gadgets-gateway` `v0.1.0-alpha.2` (`3ac72a3`)
 - Linux SDK: `grok-gadgets-linux-sdk` `v0.1.0-alpha.2` (`83d55b6`)
 - Interpreter for SDK/gateway venv: CPython 3.11.15 via `uv`
-- Connection: gateway `serve --simulator` on `127.0.0.1:8766` (MCP) and
-  `127.0.0.1:8765` (devices). No Tailscale Serve, Funnel, or public tunnel.
+- Connection: gateway `serve --simulator --allowed-host <owner HTTPS hostname>`
+  on `127.0.0.1:8766` (MCP) and `127.0.0.1:8765` (devices). Device port remains
+  loopback-only. MCP later received an **owner-approved** HTTPS front (TLS
+  terminator to `127.0.0.1:8766/mcp` only). No Tailscale Serve/Funnel. Device
+  port was not published.
 - Tester: local operator on this host. Tokens and credential files were not
-  recorded.
+  recorded. The public hostname is omitted from this report.
 
 ## Commands (repeatable, no secrets)
 
@@ -51,7 +54,7 @@ grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"o
 | Agent stop | **Pass** | `gadgets_command` → `unavailable: Device is disconnected` |
 | Agent reconnect | **Pass** | `set.light {"on": true}` executed again |
 | Physical LED / button | **Not tested** | No documented peripheral. On-board `PWR`/`ACT` sysfs LEDs exist; they are not a Grok Gadgets gadget, pins were not guessed, and the LED was not visually observed. |
-| Grok Bot | **Not tested — supported Grok Bot route is not ready** | Hub issue [HARD-GROK-REMOTE-001](https://github.com/adidshaft/grok-gadgets/issues/4) is blocked (no reviewed HTTPS/OAuth MCP). Hosting docs forbid pointing Grok Bot at loopback `serve` and forbid tunneling the device port for this test. No route was invented. |
+| Grok Bot | **Pass (operator-confirmed Remote HTTPS)** | Grok Bot desktop connector (Remote HTTPS + bearer) reached this host’s MCP. Device port `:8765` unpublished. This is **not** a pass of [HARD-GROK-REMOTE-001](https://github.com/adidshaft/grok-gadgets/issues/4) (OAuth, named/revocable tokens, rate limits still unimplemented). |
 
 ## Evidence levels (kept separate)
 
@@ -59,11 +62,12 @@ grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"o
   `serve --simulator`.
 - **Simulator / SDK TCP:** `rehearse` on loopback MCP with bearer token file.
 - **Physical observation:** none. A successful `rehearse` is not a hardware pass.
-- **Grok Bot:** none.
+- **Grok Bot:** operator-confirmed Remote HTTPS session against owner-fronted
+  MCP. No tokens, request bodies, or hostnames recorded here.
 
 ## Blockers
 
-1. Packaged, authenticated remote MCP for Grok Bot is unimplemented.
+1. Packaged product remote MCP (HARD-GROK-REMOTE-001) is still unimplemented.
 2. No authorized, documented gadget peripheral on this Pi.
 
 This report applies only to this Raspberry Pi 5 + tagged `v0.1.0-alpha.2` pair.
