@@ -55,3 +55,7 @@ Public repositories/downloads, hosted CI/private reporting and owner protection 
 pending activation. No service is activated. Native Grok/mobile, real systemd/peripherals,
 other platforms/architectures and independent human reproduction remain open. Current
 Mac checks do not extend historical Linux aarch64 container evidence to real peripherals.
+
+A later host run on a Raspberry Pi 5 is recorded in
+[HUB-HW-001 Raspberry Pi 5](hub-hw-001-raspberry-pi-5.md). That report is loopback SDK
+and simulator evidence on one board. Physical LED/button and Grok Bot were not tested.
