@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from fake_gateway import OK_HELLO, FakeGateway, bounded, error
+
 from grok_gadgets_linux import Agent, Device, SDKError
 
 GATEWAY_SOURCE = os.environ.get("GROK_GATEWAY_SOURCE")
@@ -120,7 +121,7 @@ class AgentUnitTests(unittest.IsolatedAsyncioTestCase):
                 device.capability("custom.set", lambda arguments: {"v": arguments["v"]})
                 pending = [{"command_id": "c1", "capability": "custom.set", "arguments": {"v": 1}}]
 
-                def respond(message, connection, code=code):
+                def respond(message, connection, code=code, pending=pending):
                     if message["type"] == "hello":
                         return OK_HELLO
                     if message["type"] == "poll":

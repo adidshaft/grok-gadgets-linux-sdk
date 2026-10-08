@@ -1,6 +1,7 @@
 """Reusable capability handlers, state, queued events, and bounded boot-local dedup."""
 
 import asyncio
+import contextlib
 import contextvars
 import copy
 import inspect
@@ -17,19 +18,19 @@ from .contracts import (
     MAX_HELLO_FRAME,
     RESERVED_EVENTS,
     RGB_SCHEMA,
-    VERSION,
     SCHEMA,
+    VERSION,
     SDKError,
     validate_inline_schema,
     validate_request,
+    validate_state,
     worst_case_ack,
 )
-from .contracts import validate_state
 
 
 def _is_async(function):
     return inspect.iscoroutinefunction(function) or inspect.iscoroutinefunction(
-        getattr(function, "__call__", None)
+        getattr(function, "__call__", None)  # noqa: B004 - inspects the method, not callability
     )
 
 
@@ -151,10 +152,9 @@ class Device:
 
     async def shutdown(self, timeout=5.0):
         for callback in reversed(self._shutdown_callbacks):
-            try:
+            # Fixed behavior: shutdown continues; callback text is never reported.
+            with contextlib.suppress(Exception):
                 await asyncio.wait_for(self._call(callback), timeout)
-            except Exception:
-                pass  # Fixed behavior: shutdown continues; callback text is never reported.
 
     def hello(self, token):
         device = {
@@ -252,11 +252,10 @@ class Device:
         error = None
         if capability not in self.handlers:
             error = "unsupported_capability"
-        elif not isinstance(arguments, dict):
-            error = "invalid_arguments"
-        elif capability in self.schemas and not Draft202012Validator(
-            self.schemas[capability]
-        ).is_valid(arguments):
+        elif not isinstance(arguments, dict) or (
+            capability in self.schemas
+            and not Draft202012Validator(self.schemas[capability]).is_valid(arguments)
+        ):
             error = "invalid_arguments"
         if error is None:
             try:
@@ -269,7 +268,7 @@ class Device:
                     pass
                 else:
                     error = "handler_failed"
-            except Exception:
+            except Exception:  # noqa: BLE001 - handler errors may include credentials
                 # Handler errors may include credentials: return only a fixed failure.
                 error = "handler_failed"
         ack = self._ack(cid, error)

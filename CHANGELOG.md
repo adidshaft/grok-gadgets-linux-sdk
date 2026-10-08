@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Development tools: `ruff` 0.16.10 and `hatchling` 1.32.4. Code follows the new `ruff` default rules without behavior changes. CI checks packages with `twine` 7.0.0, which reads the Metadata-Version 2.5 that `hatchling` 1.32 writes.
+
 ## 0.1.0-alpha.3 — 8 October 2026
 
 - Security: pin the gateway extra and lockfile to gateway v0.1.0-alpha.3. This moves `mcp` from 1.26.0 to 1.28.1 and closes its high-severity Dependabot alerts.

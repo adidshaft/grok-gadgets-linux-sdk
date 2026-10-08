@@ -13,9 +13,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-import grok_gadgets_linux
 from grok_gadgets_gateway.domain import Gateway
 from grok_gadgets_gateway.transport import Credentials, DeviceServer
+
+import grok_gadgets_linux
 
 
 async def eventually(predicate):
