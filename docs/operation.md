@@ -3,7 +3,7 @@
 The agent connects only to loopback TCP: `127.0.0.1` or `::1`. The default port is 8765. Run the agent and gateway on the same host.
 
 Local simulation needs no public hosting. You operate the gateway and agent on this host.
-SpaceXAI hosts Grok Bot; it does not host these processes for you.
+SpaceXSI hosts Grok Bot; it does not host these processes for you.
 
 The gateway has local stdio MCP and authenticated HTTP MCP through
 `grok-gadgets-gateway serve`. `serve` keeps running on its own. Both modes
@@ -15,8 +15,7 @@ for the future cloud route and product hosting choices.
 
 ## Start the agent
 
-For development, `grok-linux-agent dev ./my_gadget.py` is all you need: it starts a gateway in
-the same process, trusts your gadget on loopback and prints connector settings. Add `--stdio`
+For development, run `grok-linux-agent dev ./my_gadget.py`. It starts a gateway in the same process, trusts your gadget on loopback and prints connector settings. Add `--stdio`
 when the connector should start it; that path needs no token at all.
 
 To run beside a long-running gateway service instead:
@@ -94,22 +93,17 @@ A command can be accepted without a confirmed result. A reported result does not
 | Healthy session needed to reset the failure budget | 10 seconds |
 
 Revocation and contract errors stop the agent immediately. `unauthorized` before the
-first successful hello stops it immediately. After a successful hello in the same run,
-one `unauthorized` is retried with backoff, because a gateway can report a transient
-credential-file read failure that way; a second consecutive `unauthorized` stops the
-agent. `unavailable`, `busy` and connection failures are retried. Each request rechecks
+first successful hello stops it immediately. After a successful hello, the agent retries one `unauthorized` reply with backoff. A temporary credential-file read failure can cause this reply. A second consecutive `unauthorized` stops the agent. `unavailable`, `busy` and connection failures are retried. Each request rechecks
 gateway revocation. Shutdown interrupts a reconnect delay.
 
-A lost event acknowledgement retains the event ID for reconnect. The gateway does not replay a dispatched command into a new session. A handler timeout sends a `failed` acknowledgement (`handler_timeout`) and keeps the session. If an acknowledgement reaches the gateway after the command closed, the gateway answers `late_ack`; the agent drops that acknowledgement and keeps polling on the same session. On disconnect, the gateway marks a dispatched command unconfirmed.
+A lost event acknowledgement retains the event ID for reconnect. The gateway does not replay a dispatched command into a new session. A handler timeout sends a `failed` acknowledgement (`handler_timeout`) and keeps the session. If an acknowledgement arrives after the command closed, the gateway answers `late_ack`. The agent drops that acknowledgement and keeps polling on the same session. On disconnect, the gateway marks a dispatched command unconfirmed.
 
 Async handlers must respond to cancellation. A plain-function handler runs in a worker
 thread: the timeout stops the wait, not the thread. Do not detach physical actions from a handler.
 
 ## Stop and exit codes
 
-SIGTERM (`systemctl stop`) and Ctrl-C stop the agent the same way: it cancels the running
-handler, so its `finally` blocks run, then it calls `Device.on_shutdown` callbacks, then
-it exits with code 0. A plain-function handler that is still running delays exit until it
+SIGTERM (`systemctl stop`) and Ctrl-C use the same stop sequence. The agent cancels the running handler and runs its `finally` blocks. Then it calls `Device.on_shutdown` callbacks and exits with code 0. A plain-function handler that is still running delays exit until it
 returns.
 
 Every other stop prints `Agent stopped (<code>). <hint>`. The code is a fixed string; it
