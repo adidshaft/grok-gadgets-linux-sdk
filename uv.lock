@@ -218,9 +218,10 @@ wheels = [
 
 [[package]]
 name = "grok-gadgets-gateway"
-version = "0.1.0a4"
-source = { git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.4#ecad5e3f1a645e5d99ef5e527bdc2ef03141ac64" }
+version = "0.1.0a7"
+source = { git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.7#ff068b509ad8afae78746e295042edb734fecf63" }
 dependencies = [
+    { name = "cryptography" },
     { name = "httpx2" },
     { name = "jsonschema" },
     { name = "mcp" },
@@ -229,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "grok-gadgets-linux-sdk"
-version = "0.1.0a4"
+version = "0.1.0a5"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
@@ -247,7 +248,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.4" },
+    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", git = "https://github.com/adidshaft/grok-gadgets-gateway?tag=v0.1.0-alpha.7" },
     { name = "jsonschema", specifier = "==4.26.0" },
 ]
 provides-extras = ["gateway"]

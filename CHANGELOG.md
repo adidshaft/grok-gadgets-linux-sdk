@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.5 — 12 October 2026
+
+- `grok-linux-agent --version` prints the SDK version and exits without connecting ([#16](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/16)).
+- The `gateway` extra and lockfile pin gateway v0.1.0-alpha.7, so the extra names a version that the gateway's own release workflow can publish to PyPI.
+- A hand-started **release packages** workflow builds a tag, writes `SHA256SUMS` with plain file names, checks it in a fresh folder and attaches the files to the release. PyPI upload is a separate opt-in through trusted publishing; no token is stored ([#61](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/61), hub [#151](https://github.com/adidshaft/grok-gadgets/issues/151)). The package is not on PyPI yet.
+- README adds pip install from the release wheel. Homepage is https://grokgadgets.org/. Docs match the 12 October evidence.
+
 ## 0.1.0-alpha.4 — 8 October 2026
 
 - Pin the gateway extra and lockfile to gateway v0.1.0-alpha.4, which uses `mcp` 2.3.0. The README quick-start check uses the `mcp` 2.x HTTP client.
