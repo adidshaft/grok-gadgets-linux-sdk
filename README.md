@@ -46,6 +46,17 @@ connector settings Grok Bot will use. Run the local rehearsal:
 uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"on": true}'
 ```
 
+### Install with pip
+
+The package is not on PyPI yet. Each [GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases)
+has a wheel and `SHA256SUMS`. Install the wheel into a virtual environment with Python 3.11+:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install https://github.com/adidshaft/grok-gadgets-linux-sdk/releases/download/v0.1.0-alpha.4/grok_gadgets_linux_sdk-0.1.0a4-py3-none-any.whl
+.venv/bin/grok-linux-agent --help
+```
+
 ## How it works
 
 ```mermaid
