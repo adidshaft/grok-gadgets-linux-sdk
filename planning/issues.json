@@ -561,7 +561,7 @@
     "labels": [
       "enhancement"
     ],
-    "stage": "review",
-    "evidence": "GitHub #61, PR #62; .github/workflows/release.yml and docs/release.md. The same workflow attached assets for gateway v0.1.0-alpha.7 and HA v0.1.0-alpha.5 on 12 Oct 2026. PyPI setup pending."
+    "stage": "done",
+    "evidence": "GitHub #61, PR #62; published to PyPI by trusted publishing on 13 Oct 2026 (workflow run approved by the owner); files byte-identical to the GitHub release SHA256SUMS."
   }
 ]

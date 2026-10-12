@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.6 — 13 October 2026
+
+- The `gateway` extra and lockfile pin gateway v0.1.0-alpha.10, which is on PyPI, so `pip install "grok-gadgets-linux-sdk[gateway]"` resolves from PyPI ([#70](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/70)).
+- The release workflow publishes an already-released tag after checking its files match (#67).
+- README: install from PyPI with `pip install --pre`.
+
 ## 0.1.0-alpha.5 — 12 October 2026
 
 - `grok-linux-agent --version` prints the SDK version and exits without connecting ([#16](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/16)).

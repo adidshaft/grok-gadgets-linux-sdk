@@ -10,8 +10,8 @@ Independent project, not affiliated with SpaceXSI.
 
 ## Quickstart
 
-Needs Git and [uv](https://docs.astral.sh/uv/getting-started/installation/). Packages are
-not on PyPI yet.
+Needs Git and [uv](https://docs.astral.sh/uv/getting-started/installation/). To install from
+PyPI instead, see [Install with pip](#install-with-pip).
 
 ```sh
 git clone https://github.com/adidshaft/grok-gadgets-linux-sdk.git
@@ -48,14 +48,18 @@ uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --ar
 
 ### Install with pip
 
-The package is not on PyPI yet. Each [GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases)
-has a wheel and `SHA256SUMS`. Install the wheel into a virtual environment with Python 3.11+:
+The SDK is on [PyPI](https://pypi.org/project/grok-gadgets-linux-sdk/). Install it into a
+virtual environment with Python 3.11+. It is an alpha, so name the version or pass `--pre`:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install https://github.com/adidshaft/grok-gadgets-linux-sdk/releases/download/v0.1.0-alpha.5/grok_gadgets_linux_sdk-0.1.0a5-py3-none-any.whl
-.venv/bin/grok-linux-agent --help
+.venv/bin/python -m pip install --pre "grok-gadgets-linux-sdk[gateway]"
+.venv/bin/grok-linux-agent --version
 ```
+
+The `gateway` extra adds the gateway for `grok-linux-agent dev`. Each
+[GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases) also has the wheel
+and `SHA256SUMS`.
 
 ## How it works
 
