@@ -7,6 +7,7 @@ import importlib.util
 import os
 import signal
 import sys
+from importlib.metadata import version
 from pathlib import Path
 from uuid import uuid4
 
@@ -206,6 +207,11 @@ def main(argv=None):
             "4 protocol contract, 5 reconnect attempts exhausted. "
             "For local development with no tokens: grok-linux-agent dev ./my_gadget.py"
         ),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="grok-linux-agent " + version("grok-gadgets-linux-sdk"),
     )
     factories = parser.add_mutually_exclusive_group()
     factories.add_argument(

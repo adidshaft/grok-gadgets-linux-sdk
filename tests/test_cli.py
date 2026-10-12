@@ -21,6 +21,19 @@ async def eventually(predicate, timeout=10):
             await asyncio.sleep(0.01)
 
 
+class VersionTests(unittest.TestCase):
+    def test_version_prints_sdk_version_without_connecting(self):
+        from importlib.metadata import version
+
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), self.assertRaises(SystemExit) as stopped:
+            main(["--version"])
+        self.assertEqual(stopped.exception.code, 0)
+        self.assertEqual(
+            output.getvalue(), f"grok-linux-agent {version('grok-gadgets-linux-sdk')}\n"
+        )
+
+
 class FactoryTests(unittest.TestCase):
     def test_builtin_and_explicit_file_without_path_mutation(self):
         self.assertTrue(load_factory("grok_gadgets_linux.examples:software_lamp").simulated)
