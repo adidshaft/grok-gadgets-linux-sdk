@@ -25,7 +25,7 @@ dependencies = ["jsonschema==4.26.0"]
 gateway = ["grok-gadgets-gateway==0.1.0a4"]
 
 [project.urls]
-Homepage = "https://grok-gadgets.pages.dev/"
+Homepage = "https://grokgadgets.org/"
 Source = "https://github.com/adidshaft/grok-gadgets-linux-sdk"
 Issues = "https://github.com/adidshaft/grok-gadgets-linux-sdk/issues"
 Changelog = "https://github.com/adidshaft/grok-gadgets-linux-sdk/blob/main/CHANGELOG.md"
