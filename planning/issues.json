@@ -534,5 +534,34 @@
     ],
     "stage": "done",
     "evidence": "Documentation-only review. Dated receipts and checksum-pinned protocol copies remain historical evidence. See the accompanying PR for check results."
+  },
+  {
+    "id": "LIN-GFI-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Add --version to grok-linux-agent",
+    "acceptance": [
+      "Prints the SDK version from importlib.metadata and exits 0 without connecting",
+      "Test in tests/test_cli.py"
+    ],
+    "labels": [
+      "good first issue"
+    ],
+    "stage": "done",
+    "evidence": "GitHub #16, PR #60; tests/test_cli.py VersionTests."
+  },
+  {
+    "id": "LIN-PYPI-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "No release automation; SHA256SUMS listed dist/ paths; nothing could publish to PyPI",
+    "acceptance": [
+      "Hand-started workflow checks tag/version, builds once, writes and checks plain-name SHA256SUMS",
+      "Attaches files to the release without replacing assets",
+      "Opt-in PyPI upload through trusted publishing; no stored token"
+    ],
+    "labels": [
+      "enhancement"
+    ],
+    "stage": "review",
+    "evidence": "GitHub #61, PR #62; .github/workflows/release.yml and docs/release.md. The same workflow attached assets for gateway v0.1.0-alpha.7 and HA v0.1.0-alpha.5 on 12 Oct 2026. PyPI setup pending."
   }
 ]

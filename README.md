@@ -53,7 +53,7 @@ has a wheel and `SHA256SUMS`. Install the wheel into a virtual environment with 
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install https://github.com/adidshaft/grok-gadgets-linux-sdk/releases/download/v0.1.0-alpha.4/grok_gadgets_linux_sdk-0.1.0a4-py3-none-any.whl
+.venv/bin/python -m pip install https://github.com/adidshaft/grok-gadgets-linux-sdk/releases/download/v0.1.0-alpha.5/grok_gadgets_linux_sdk-0.1.0a5-py3-none-any.whl
 .venv/bin/grok-linux-agent --help
 ```
 
