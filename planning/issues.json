@@ -563,5 +563,11 @@
     ],
     "stage": "done",
     "evidence": "GitHub #61, PR #62; published to PyPI by trusted publishing on 13 Oct 2026 (workflow run approved by the owner); files byte-identical to the GitHub release SHA256SUMS."
+  },
+  {
+    "id": "DOC-STE-002",
+    "problem": "Lead with published package installation",
+    "stage": "done",
+    "evidence": "Ruff check and format pass; 55 tests run with 12 opt-in integration skips; wheel and source build pass."
   }
 ]

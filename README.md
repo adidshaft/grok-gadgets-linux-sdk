@@ -8,10 +8,25 @@ Independent project, not affiliated with SpaceXSI.
 
 > Writing style: ASD-STE100-inspired English. Use short sentences, active verbs and one instruction per step. This is not certified compliance.
 
+## Install from PyPI
+
+The SDK is on [PyPI](https://pypi.org/project/grok-gadgets-linux-sdk/). Install it into a
+virtual environment with Python 3.11+. It is an alpha, so name the version or pass `--pre`:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install --pre "grok-gadgets-linux-sdk[gateway]"
+.venv/bin/grok-linux-agent --version
+```
+
+The `gateway` extra adds the gateway for `grok-linux-agent dev`. Each
+[GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases) also has the wheel
+and `SHA256SUMS`.
+
+
 ## Quickstart
 
-Needs Git and [uv](https://docs.astral.sh/uv/getting-started/installation/). To install from
-PyPI instead, see [Install with pip](#install-with-pip).
+For contributors: clone the source with Git and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```sh
 git clone https://github.com/adidshaft/grok-gadgets-linux-sdk.git
@@ -46,20 +61,6 @@ connector settings Grok Bot will use. Run the local rehearsal:
 uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"on": true}'
 ```
 
-### Install with pip
-
-The SDK is on [PyPI](https://pypi.org/project/grok-gadgets-linux-sdk/). Install it into a
-virtual environment with Python 3.11+. It is an alpha, so name the version or pass `--pre`:
-
-```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install --pre "grok-gadgets-linux-sdk[gateway]"
-.venv/bin/grok-linux-agent --version
-```
-
-The `gateway` extra adds the gateway for `grok-linux-agent dev`. Each
-[GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases) also has the wheel
-and `SHA256SUMS`.
 
 ## How it works
 
