@@ -40,6 +40,7 @@ from grok_gadgets_linux import Gadget
 
 lamp = Gadget("desk-lamp", "Desk lamp", state={"on": False})
 
+
 @lamp.command("Turn the desk lamp on or off")
 def set_light(on: bool) -> dict:
     # Your hardware code goes here, for example gpio.write(17, on).
@@ -84,6 +85,7 @@ reports. Set `simulated=False` only when your code really controls hardware.
 from typing import Annotated
 
 from grok_gadgets_linux import Range
+
 
 @lamp.command("Set the brightness from 0 to 100", name="level.set")
 def level(level: Annotated[int, Range(0, 100)]) -> dict:
