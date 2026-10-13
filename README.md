@@ -3,10 +3,19 @@
 Turn Python functions into gadgets your Grok Bot can call through the
 [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway). Start with a
 software lamp; add your hardware code later. This SDK does not yet have accepted Linux hardware evidence.
-The separate ESP32 kit has physical evidence. Native Grok Bot MCP access remains unverified ([project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix)).
+The owner verified native Grok Bot calls from Mac and iPhone through gateway OAuth and an HTTPS tunnel.
+That result used the separate ESP32 kit; it does not verify Linux hardware ([project status](https://grokgadgets.org/doc-docs-public-support-matrix)).
 Independent project, not affiliated with SpaceXSI.
 
 > Writing style: ASD-STE100-inspired English. Use short sentences, active verbs and one instruction per step. This is not certified compliance.
+
+## Start here
+
+| Path | Next step |
+| --- | --- |
+| [Try the SDK](#install-from-pypi) | Install and test a software gadget |
+| [Build a gadget](docs/development.md) | Add commands and hardware code |
+| [Understand the route](https://github.com/adidshaft/grok-gadgets/blob/main/docs/getting-started/connect-grok-bot.md) | See the tested Grok Bot connection |
 
 ## Install from PyPI
 
@@ -54,7 +63,7 @@ uv run grok-linux-agent dev ./my_gadget.py
 ```
 
 `dev` starts a local gateway, connects your gadget with no token to copy, and prints the
-connector settings Grok Bot will use. Run the local rehearsal:
+local test settings. Grok Bot uses a separate [OAuth connection](https://github.com/adidshaft/grok-gadgets-gateway/blob/main/docs/tunnel.md#oauth-sign-in-for-grok-bot). Run the local rehearsal:
 
 ```sh
 uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"on": true}'
@@ -66,7 +75,7 @@ uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --ar
 flowchart LR
     A["Your Python functions"] --> S["SDK agent"]
     S <-->|"127.0.0.1:8765"| G["Gateway"]
-    B["Grok Bot (connection in progress)"] -.-> G
+    B["Grok Bot"] -->|"HTTPS and OAuth via owner-run tunnel"| G
     R["rehearse (local check)"] --> G
 ```
 
@@ -74,6 +83,9 @@ Your file declares a `Gadget` and its commands. The agent connects it to the
 [gateway](https://github.com/adidshaft/grok-gadgets-gateway) on the same computer, and the
 gateway offers its commands to Grok Bot, with your one-line descriptions. `dev` runs both
 in one process. Each command's schema comes from its type hints, so the SDK refuses bad arguments before your code runs.
+
+The SDK agent connects only to a gateway on the same computer. A remote Linux gadget transport is planned.
+See the [project roadmap](https://github.com/adidshaft/grok-gadgets/blob/main/ROADMAP.md).
 
 ## Add your hardware
 
@@ -113,8 +125,8 @@ restart. A systemd user unit template, reconnect limits and exit codes are in th
 
 Python 3.11–3.14. CI runs on Ubuntu every night, including the README quick start and the
 gateway integration tests against gateway `main`. Raspberry Pi 3, 4, 5 and Zero 2 W have PyPI wheels for every dependency. The armv6l models (Pi Zero, Zero W, Pi 1) need a Rust
-toolchain for `rpds-py`. Nobody has tested a Raspberry Pi yet; see the
-[project status](https://grok-gadgets.pages.dev/doc-docs-public-support-matrix).
+toolchain for `rpds-py`. An outside Raspberry Pi 5 report awaits review and a released-version rerun. It is not accepted hardware evidence; see the
+[project status](https://grokgadgets.org/doc-docs-public-support-matrix).
 
 ## Troubleshooting
 
