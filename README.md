@@ -23,7 +23,6 @@ The `gateway` extra adds the gateway for `grok-linux-agent dev`. Each
 [GitHub release](https://github.com/adidshaft/grok-gadgets-linux-sdk/releases) also has the wheel
 and `SHA256SUMS`.
 
-
 ## Quickstart
 
 For contributors: clone the source with Git and [uv](https://docs.astral.sh/uv/getting-started/installation/).
@@ -40,7 +39,6 @@ Save this as `my_gadget.py`:
 from grok_gadgets_linux import Gadget
 
 lamp = Gadget("desk-lamp", "Desk lamp", state={"on": False})
-
 
 @lamp.command("Turn the desk lamp on or off")
 def set_light(on: bool) -> dict:
@@ -60,7 +58,6 @@ connector settings Grok Bot will use. Run the local rehearsal:
 ```sh
 uv run grok-gadgets-gateway rehearse --device desk-lamp --command set.light --args '{"on": true}'
 ```
-
 
 ## How it works
 
@@ -87,7 +84,6 @@ reports. Set `simulated=False` only when your code really controls hardware.
 from typing import Annotated
 
 from grok_gadgets_linux import Range
-
 
 @lamp.command("Set the brightness from 0 to 100", name="level.set")
 def level(level: Annotated[int, Range(0, 100)]) -> dict:
