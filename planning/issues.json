@@ -569,5 +569,20 @@
     "problem": "Lead with published package installation",
     "stage": "done",
     "evidence": "Ruff check and format pass; 55 tests run with 12 opt-in integration skips; wheel and source build pass."
+  },
+  {
+    "id": "DOC-PHASE8-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Current documentation needs the verified Phase 8 route and clear start paths",
+    "acceptance": [
+      "Keep owner-only evidence and remaining gates explicit",
+      "Separate the current route from proposed relay work",
+      "Link three start paths from the README"
+    ],
+    "labels": [
+      "documentation"
+    ],
+    "stage": "review",
+    "evidence": "GitHub #75; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 55 unit tests (12 opt-in skips), Ruff lint/format, and package build passed."
   }
 ]
