@@ -4,6 +4,7 @@ Turn Python functions into gadgets your Grok Bot can call through the
 [Grok Gadgets gateway](https://github.com/adidshaft/grok-gadgets-gateway). Start with a
 software lamp; add your hardware code later. This SDK does not yet have accepted Linux hardware evidence.
 The owner verified native Grok Bot calls from Mac and iPhone through gateway OAuth and an HTTPS tunnel.
+See the [13 October record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/grok-remote-https-2026-10-13.md).
 That result used the separate ESP32 kit; it does not verify Linux hardware ([project status](https://grokgadgets.org/doc-docs-public-support-matrix)).
 Independent project, not affiliated with SpaceXSI.
 
@@ -159,3 +160,8 @@ open-source project. It is **not affiliated with, endorsed by or sponsored by Sp
 [history record](https://github.com/adidshaft/grok-gadgets/blob/main/docs/verification/publication-sanitization.md).
 Detailed verification records: [launch verification](docs/verification/launch-docs.md) and
 [historical record](docs/verification.md).
+
+## Project discussion
+
+Ask questions and share gadget ideas in [hub Discussions](https://github.com/adidshaft/grok-gadgets/discussions).
+Use this repository's issue forms for defects.
