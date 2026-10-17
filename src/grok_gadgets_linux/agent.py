@@ -1,8 +1,12 @@
-"""Single-session loopback device agent; no internet or model calls."""
+"""Single-session device agent: loopback, or a relay over TLS with a pinned CA (hub ADR 013).
+
+It makes no model calls.
+"""
 
 import asyncio
 import json
 import random
+import ssl
 import time
 
 from .contracts import (
@@ -40,15 +44,28 @@ class Agent:
         *,
         host="127.0.0.1",
         port=8765,
-        poll_interval=0.1,
+        ca=None,
+        server_name=None,
+        poll_interval=None,
         reconnect_attempts=8,
         backoff_initial=0.25,
         backoff_cap=5.0,
         request_timeout=2.0,
         handler_timeout=5.0,
     ):
-        if host not in {"127.0.0.1", "::1"}:
-            raise ValueError("Alpha transport supports loopback IPs only")
+        # Loopback is plain TCP. Any other host is a relay: TLS with the relay's CA as the only
+        # trust anchor and the name checked, as an ESP32 Wi-Fi gadget does (hub ADR 005, 013).
+        self.ssl = None
+        if ca is None:
+            if host not in {"127.0.0.1", "::1"}:
+                raise ValueError("A relay needs its CA: pass ca (the relay's lan/ca.pem)")
+        else:
+            context = ssl.create_default_context(cadata=ca)
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            self.ssl = context
+        self.server_name = (server_name or host) if self.ssl else None
+        if poll_interval is None:
+            poll_interval = 0.5 if self.ssl else 0.1  # A relay is polled every 500 ms.
         if type(port) is not int or not 1 <= port <= 65535:
             raise ValueError("Invalid port")
         if not 0.01 <= poll_interval <= 0.5:
@@ -120,7 +137,14 @@ class Agent:
 
     async def _session(self, stop):
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(self.host, self.port, limit=MAX_FRAME), self.request_timeout
+            asyncio.open_connection(
+                self.host,
+                self.port,
+                limit=MAX_FRAME,
+                ssl=self.ssl,
+                server_hostname=self.server_name,
+            ),
+            self.request_timeout,
         )
         try:
             token = self.token() if callable(self.token) else self.token
@@ -168,9 +192,21 @@ class Agent:
 
     async def run(self, stop=None):
         stop = stop or asyncio.Event()
+        # Background producers start once and outlive reconnects; they stop before shutdown.
+        quit_producers = asyncio.Event()
+        producers = [
+            asyncio.create_task(produce(quit_producers)) for produce in self.device._background
+        ]
         try:
             await self._run(stop)
         finally:
+            quit_producers.set()
+            if producers:
+                _, late = await asyncio.wait(producers, timeout=self.handler_timeout)
+                for task in late:
+                    task.cancel()
+                if late:
+                    await asyncio.wait(late, timeout=self.handler_timeout)
             await self.device.shutdown(self.handler_timeout)
 
     async def _run(self, stop):
@@ -187,6 +223,10 @@ class Agent:
                     self._auth_grace = False
                 elif error.code in _FATAL:
                     raise
+            except ssl.SSLCertVerificationError:
+                # The relay's certificate is not from this CA or not for this name: retrying
+                # cannot help, as on the ESP32 ("TLS rejected").
+                raise SDKError("tls_rejected") from None
             except (OSError, TimeoutError, ValueError):
                 pass
             if stop.is_set():

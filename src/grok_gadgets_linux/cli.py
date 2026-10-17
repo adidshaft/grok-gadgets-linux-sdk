@@ -5,7 +5,9 @@ import asyncio
 import importlib
 import importlib.util
 import os
+import re
 import signal
+import ssl
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -106,6 +108,20 @@ _HINTS = {
     "factory_error": (EXIT_CONFIG, "Factory could not load."),
     "invalid_option": (EXIT_CONFIG, "Check --port and --max-attempts values."),
     "simulation_only": (EXIT_CONFIG, "--simulate-button needs a simulated device."),
+    "gateway_invalid": (
+        EXIT_CONFIG,
+        "Use --gateway NAME[:PORT] with the relay's DNS name, for example devices.example.net.",
+    ),
+    "ca_missing": (EXIT_CONFIG, "A relay needs --ca: the relay's lan/ca.pem."),
+    "ca_unreadable": (EXIT_CONFIG, "--ca must be a readable PEM CA certificate."),
+    "ca_without_gateway": (EXIT_CONFIG, "--ca goes with --gateway NAME[:PORT]."),
+    "tls_rejected": (
+        EXIT_CONFIG,
+        (
+            "The relay's certificate is not from this CA or not for this name; check --ca and "
+            "--gateway (grok-gadgets-gateway relay-check NAME --ca FILE)."
+        ),
+    ),
     "unauthorized": (
         EXIT_AUTH,
         "Gateway rejected the device ID or token; enroll the device and set its token.",
@@ -169,6 +185,31 @@ def _token():
     return token
 
 
+_NAME = re.compile(r"(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}")
+
+
+def _remote(args):
+    """Loopback by default; --gateway NAME[:PORT] with --ca for a relay over TLS."""
+    if not args.gateway:
+        if args.ca:
+            raise SDKError("ca_without_gateway")
+        return {"port": args.port}
+    name, _, port_text = args.gateway.partition(":")
+    if not _NAME.fullmatch(name) or (port_text and not port_text.isdigit()):
+        raise SDKError("gateway_invalid")
+    port = int(port_text) if port_text else 8444
+    if not 1 <= port <= 65535:
+        raise SDKError("gateway_invalid")
+    if not args.ca:
+        raise SDKError("ca_missing")
+    try:
+        ca = Path(args.ca).read_text()
+        ssl.create_default_context(cadata=ca)
+    except (OSError, ValueError, ssl.SSLError):
+        raise SDKError("ca_unreadable") from None
+    return {"host": name, "port": port, "ca": ca, "request_timeout": 5.0}
+
+
 def _stopped(code, hint=None):
     status, default = _HINTS.get(code, (EXIT_INTERNAL, "Inspect redacted diagnostics privately."))
     print(f"Agent stopped ({code}). {hint or default}", file=sys.stderr)
@@ -224,7 +265,15 @@ def main(argv=None):
         help="Explicit trusted local path.py (one Gadget or create()) or path.py:function; "
         "executes local code",
     )
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, default=8765, help="loopback gateway port")
+    parser.add_argument(
+        "--gateway",
+        metavar="NAME[:PORT]",
+        help="a relay's DNS name (port 8444 by default); needs --ca and a token (hub ADR 013)",
+    )
+    parser.add_argument(
+        "--ca", metavar="FILE", help="the relay's lan/ca.pem, the only trust anchor"
+    )
     parser.add_argument(
         "--token-file",
         help="private (mode 0600) file holding the device token, re-read on each connection; "
@@ -258,12 +307,13 @@ def main(argv=None):
                 raise SDKError("simulation_only")
             device.emit("button", {"pressed": True})
             device.emit("button", {"pressed": False})
+        remote = _remote(args)
         token = _token_file(args.token_file) if args.token_file else _token()
         try:
             agent = Agent(
                 device,
                 token,
-                port=args.port,
+                **remote,
                 reconnect_attempts=None if args.retry_forever else args.max_attempts,
                 backoff_cap=30.0 if args.retry_forever else 5.0,
             )

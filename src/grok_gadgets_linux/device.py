@@ -69,6 +69,7 @@ class Device:
         self._event_sequence = 0
         self._execution_lock = asyncio.Lock()
         self._shutdown_callbacks = []
+        self._background = []
         self._thread = None
 
     @property
@@ -127,6 +128,18 @@ class Device:
             self.event_descriptions[name] = self._described(None, description)["description"]
         self.event_names.add(name)
         return self
+
+    def background(self, function):
+        """Register an async producer, `async def produce(stop)`, such as a sensor loop.
+
+        The agent starts each producer once, keeps it running across reconnects, and sets
+        `stop` when it stops, before the shutdown callbacks. Use `publish_state` and `emit`
+        from it; `emit` raises SDKError("event_queue_full") when the queue is full.
+        """
+        if not _is_async(function):
+            raise TypeError("Background producers are async functions: async def produce(stop)")
+        self._background.append(function)
+        return function
 
     def on_shutdown(self, callback):
         """Register a callback run when the agent stops, after in-flight handlers are cancelled.
