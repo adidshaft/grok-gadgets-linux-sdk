@@ -89,15 +89,16 @@ three things: the device name and port, the relay's CA file and a token file for
 `enroll --batch … --no-labels` makes one token file per gadget.
 
 ```sh
-grok-linux-agent --factory-file ./my_gadget.py --gateway devices.example.net \
-  --ca relay-ca.pem --token-file lamp-01.token --retry-forever
+grok-linux-agent --factory-file ./my_gadget.py --device-id lamp-01 \
+  --gateway devices.example.net --ca relay-ca.pem --token-file lamp-01.token --retry-forever
 ```
 
 - The port is 8444 unless you add one: `--gateway devices.example.net:8443` for an older relay.
 - The agent polls every 500 ms on a relay, and every 100 ms on loopback.
 - A certificate from another CA, or for another name, stops the agent with `tls_rejected`
   (exit code 2). Check the files with `grok-gadgets-gateway relay-check NAME --ca FILE`.
-- The device ID in your factory must match the enrolled ID, for example `lamp-01`.
+- `--device-id` sets the enrolled ID, for example `lamp-01`. It replaces the ID in your
+  factory, so one factory serves the whole batch. The agent shows the ID when it starts.
 
 ## Connection limits
 
