@@ -45,8 +45,8 @@ class FakeGateway:
             return {"ok": True, "commands": [self.commands.pop(0)] if self.commands else []}
         return {"ok": True}
 
-    async def start(self):
-        self.server = await asyncio.start_server(self._client, "127.0.0.1", 0)
+    async def start(self, ssl=None):
+        self.server = await asyncio.start_server(self._client, "127.0.0.1", 0, ssl=ssl)
         self.port = self.server.sockets[0].getsockname()[1]
         return self
 

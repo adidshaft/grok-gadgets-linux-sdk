@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.9 — 18 October 2026
+
+- On 17 October 2026 two Linux gadgets from a batch (`enroll --count 2`) connected to a fresh relay over TLS with `--gateway`, `--ca`, `--device-id` and their token files, and showed Online in the relay's `builder report` ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/builder-kit-2026-10-17.md)). Simulated devices; a Linux gadget has no claim code, so the operator assigns it to an account.
+- The `gateway` extra pins `grok-gadgets-gateway==0.1.0a17` from PyPI. The protocol is unchanged.
+
+- Connect to a relay ([#76](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/76), hub ADR 013). `grok-linux-agent --gateway NAME[:PORT] --ca FILE` connects over TLS with the relay's CA as the only trust anchor and the name checked; port 8444 by default; polls every 500 ms. A certificate from another CA or for another name stops the agent with `tls_rejected` (exit 2). `Agent(host=..., ca=..., server_name=...)` in code. Loopback stays the default and unchanged.
+- `grok-linux-agent --device-id ID` sets the enrolled ID, so one factory serves a whole batch made with `enroll --count` ([#76](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/76), clean-room run). The agent shows its device ID when it starts.
+- Background producers and a climate sensor example ([#13](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/13)). `device.background(async def produce(stop))` starts once per agent run, survives reconnects and stops before the shutdown callbacks. `grok_gadgets_linux.examples:climate_sensor` publishes `climate` every 2 s, emits `threshold.crossed`, takes `threshold.set`, and counts events dropped by a full queue.
+
 ## 0.1.0-alpha.8 — 17 October 2026
 
 - Protocol 0.1.0 is re-pinned from gateway 0.1.0-alpha.16, with its optional signed-update frames and `fixtures/update-transcript.json` ([#89](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/89)). The Linux agent does not take updates and sends no update fields; its wire behaviour is unchanged.

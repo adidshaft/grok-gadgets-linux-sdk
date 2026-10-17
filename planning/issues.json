@@ -618,5 +618,22 @@
     ],
     "stage": "done",
     "evidence": "GitHub #89; pinned gateway 7dd5b3a; unit tests pass, including the pin comparison against a gateway dev checkout. Merge after the gateway release. Released in 0.1.0-alpha.8 with the extra pinned to gateway 0.1.0a16."
+  },
+  {
+    "id": "LIN-REMOTE-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "A Linux gadget connects to loopback only",
+    "acceptance": [
+      "--gateway NAME:PORT --ca FILE over TLS, pinned CA, name checked",
+      "Fatal tls_rejected for another CA or name",
+      "Tests, including the real relay listener"
+    ],
+    "labels": [
+      "feature",
+      "linux",
+      "P1"
+    ],
+    "stage": "done",
+    "evidence": "GitHub #76; tests/test_remote.py (fake TLS gateway and the real gateway relay listener). Not yet on a real relay. Released in 0.1.0a9. Phase 12a dry run on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): two batch gadgets Online on a fresh relay over TLS."
   }
 ]
