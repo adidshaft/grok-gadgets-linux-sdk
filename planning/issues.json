@@ -601,5 +601,22 @@
     ],
     "stage": "done",
     "evidence": "GitHub #87; extra ==0.1.0a15 from PyPI; uv lock; ruff, format, 55 unit tests (12 gateway integration skips locally), uv build."
+  },
+  {
+    "id": "LIN-PIN-003",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Protocol 0.1.0 gained optional update frames (gateway GW-OTA-001)",
+    "acceptance": [
+      "Vendored protocol files and hashes match gateway",
+      "Update fixture vendored",
+      "Checks pass against the released gateway"
+    ],
+    "labels": [
+      "chore",
+      "linux",
+      "P2"
+    ],
+    "stage": "review",
+    "evidence": "GitHub #89; pinned gateway 7dd5b3a; unit tests pass, including the pin comparison against a gateway dev checkout. Merge after the gateway release."
   }
 ]
