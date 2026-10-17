@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.7 — 17 October 2026
+
+- Protocol files re-pinned to gateway `dev` with the optional claim fields of hub ADR 011 ([#82](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/82)). The agent does not send `claim`, so its frames and replies are unchanged.
+
 ## 0.1.0-alpha.6 — 13 October 2026
 
 - The `gateway` extra and lockfile pin gateway v0.1.0-alpha.10, which is on PyPI, so `pip install "grok-gadgets-linux-sdk[gateway]"` resolves from PyPI ([#70](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/70)).
