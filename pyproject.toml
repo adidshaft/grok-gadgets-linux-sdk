@@ -22,7 +22,7 @@ dependencies = ["jsonschema==4.26.0"]
 
 [project.optional-dependencies]
 # `grok-linux-agent dev` runs the gateway in-process. The gateway never depends on this SDK.
-gateway = ["grok-gadgets-gateway==0.1.0a10"]
+gateway = ["grok-gadgets-gateway==0.1.0a15"]
 
 [project.urls]
 Homepage = "https://grokgadgets.org/"
@@ -45,7 +45,3 @@ dev = ["ruff==0.17.0"]
 
 [tool.ruff]
 line-length = 100
-
-[tool.uv.sources]
-# Until the gateway is on PyPI, the extra comes from its public repository.
-grok-gadgets-gateway = { git = "https://github.com/adidshaft/grok-gadgets-gateway", tag = "v0.1.0-alpha.10" }
