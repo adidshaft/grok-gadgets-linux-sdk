@@ -81,6 +81,24 @@ HTTP client leaves `serve` running. A stdio gateway ends when its client closes 
 
 A command can be accepted without a confirmed result. A reported result does not prove a physical effect. Record each evidence level separately.
 
+## Connect to a relay
+
+A relay is the gateway on an always-on host (hub ADR 009). The agent connects out to it over
+TLS. It trusts only the relay's CA and checks the relay's name. The relay operator gives you
+three things: the device name and port, the relay's CA file and a token file for your gadget.
+`enroll --batch … --no-labels` makes one token file per gadget.
+
+```sh
+grok-linux-agent --factory-file ./my_gadget.py --gateway devices.example.net \
+  --ca relay-ca.pem --token-file lamp-01.token --retry-forever
+```
+
+- The port is 8444 unless you add one: `--gateway devices.example.net:8443` for an older relay.
+- The agent polls every 500 ms on a relay, and every 100 ms on loopback.
+- A certificate from another CA, or for another name, stops the agent with `tls_rejected`
+  (exit code 2). Check the files with `grok-gadgets-gateway relay-check NAME --ca FILE`.
+- The device ID in your factory must match the enrolled ID, for example `lamp-01`.
+
 ## Connection limits
 
 | Setting | Default |
