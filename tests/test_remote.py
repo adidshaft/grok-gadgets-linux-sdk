@@ -203,6 +203,7 @@ GATEWAY_SOURCE = __import__("os").environ.get("GROK_GATEWAY_SOURCE")
 
 
 @unittest.skipUnless(GATEWAY_SOURCE, "needs GROK_GATEWAY_SOURCE (CI runs it)")
+@unittest.skipIf(x509 is None, "needs cryptography (the gateway extra)")
 class RealRelayListener(unittest.IsolatedAsyncioTestCase):
     """The real gateway's relay listener, its own CA and device certificate."""
 
