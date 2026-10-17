@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Connect to a relay ([#76](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/76), hub ADR 013). `grok-linux-agent --gateway NAME[:PORT] --ca FILE` connects over TLS with the relay's CA as the only trust anchor and the name checked; port 8444 by default; polls every 500 ms. A certificate from another CA or for another name stops the agent with `tls_rejected` (exit 2). `Agent(host=..., ca=..., server_name=...)` in code. Loopback stays the default and unchanged.
+- `grok-linux-agent --device-id ID` sets the enrolled ID, so one factory serves a whole batch made with `enroll --count` ([#76](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/76), clean-room run). The agent shows its device ID when it starts.
 - Background producers and a climate sensor example ([#13](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/13)). `device.background(async def produce(stop))` starts once per agent run, survives reconnects and stops before the shutdown callbacks. `grok_gadgets_linux.examples:climate_sensor` publishes `climate` every 2 s, emits `threshold.crossed`, takes `threshold.set`, and counts events dropped by a full queue.
 
 ## 0.1.0-alpha.8 — 17 October 2026

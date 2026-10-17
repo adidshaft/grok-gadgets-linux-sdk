@@ -174,6 +174,30 @@ class RemoteCli(unittest.TestCase):
                 code = main(argv)
             self.assertEqual(code, 2, argv)
 
+    def test_device_id_replaces_the_factory_id(self):
+        import contextlib
+        import io
+        import os
+        import socket
+
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(main(["--device-id", "lamp 01"]), 2)
+        self.assertIn("--device-id takes", err.getvalue())
+
+        with socket.socket() as probe:  # A closed loopback port: the agent stops after one try.
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as folder:
+            token = Path(folder) / "lamp-07.token"
+            token.write_text(TOKEN)
+            os.chmod(token, 0o600)
+            argv = ["--device-id", "lamp-07", "--port", str(port), "--token-file", str(token)]
+            with contextlib.redirect_stderr(err):
+                self.assertEqual(main([*argv, "--max-attempts", "1"]), 5)
+        self.assertIn("Agent starting as lamp-07; software simulation", err.getvalue())
+
 
 GATEWAY_SOURCE = __import__("os").environ.get("GROK_GATEWAY_SOURCE")
 

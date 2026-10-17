@@ -124,7 +124,14 @@ _HINTS = {
     ),
     "unauthorized": (
         EXIT_AUTH,
-        "Gateway rejected the device ID or token; enroll the device and set its token.",
+        (
+            "Gateway rejected the device ID or token; the ID shown at start must be the enrolled"
+            " ID (set it with --device-id) and the token must be its token."
+        ),
+    ),
+    "device_id_invalid": (
+        EXIT_CONFIG,
+        "--device-id takes 1 to 64 letters, digits, '.', '_', ':' or '-', for example lamp-01.",
     ),
     "revoked": (
         EXIT_AUTH,
@@ -185,6 +192,7 @@ def _token():
     return token
 
 
+_DEVICE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,63}")
 _NAME = re.compile(r"(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}")
 
 
@@ -280,6 +288,12 @@ def main(argv=None):
         "write it with grok-gadgets-gateway enroll <id> --token-file <file>",
     )
     parser.add_argument(
+        "--device-id",
+        metavar="ID",
+        help="the enrolled device ID, for example lamp-01; replaces the factory's ID, so one "
+        "factory serves a whole batch",
+    )
+    parser.add_argument(
         "--simulate-button",
         action="store_true",
         help="Explicitly inject press/release into the simulated example",
@@ -302,6 +316,10 @@ def main(argv=None):
             device = load_device_file(args.factory_file)
         else:
             device = load_factory(args.factory or "grok_gadgets_linux.examples:software_lamp")
+        if args.device_id is not None:
+            if not _DEVICE_ID.fullmatch(args.device_id):
+                raise SDKError("device_id_invalid")
+            device.device_id = args.device_id
         if args.simulate_button:
             if not device.simulated:
                 raise SDKError("simulation_only")
@@ -320,9 +338,12 @@ def main(argv=None):
         except ValueError:
             raise SDKError("invalid_option") from None
         print(
-            "Agent starting; software simulation"
-            if device.simulated
-            else "Agent starting; physical effects require observation",
+            f"Agent starting as {device.device_id}; "
+            + (
+                "software simulation"
+                if device.simulated
+                else "physical effects require observation"
+            ),
             file=sys.stderr,
             flush=True,
         )
