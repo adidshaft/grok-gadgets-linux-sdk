@@ -584,5 +584,22 @@
     ],
     "stage": "review",
     "evidence": "GitHub #75; README and current documentation reviewed against the 13 October owner handoff. No new hardware or Grok Bot test. 55 unit tests (12 opt-in skips), Ruff lint/format, and package build passed."
+  },
+  {
+    "id": "LIN-PIN-002",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "The gateway extra pinned gateway alpha.10 from a Git tag",
+    "acceptance": [
+      "Extra pins the PyPI release",
+      "No Git source",
+      "Checks pass"
+    ],
+    "labels": [
+      "chore",
+      "linux",
+      "P2"
+    ],
+    "stage": "done",
+    "evidence": "GitHub #87; extra ==0.1.0a15 from PyPI; uv lock; ruff, format, 55 unit tests (12 gateway integration skips locally), uv build."
   }
 ]
