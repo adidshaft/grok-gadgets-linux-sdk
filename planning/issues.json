@@ -616,7 +616,7 @@
       "linux",
       "P2"
     ],
-    "stage": "review",
-    "evidence": "GitHub #89; pinned gateway 7dd5b3a; unit tests pass, including the pin comparison against a gateway dev checkout. Merge after the gateway release."
+    "stage": "done",
+    "evidence": "GitHub #89; pinned gateway 7dd5b3a; unit tests pass, including the pin comparison against a gateway dev checkout. Merge after the gateway release. Released in 0.1.0-alpha.8 with the extra pinned to gateway 0.1.0a16."
   }
 ]
