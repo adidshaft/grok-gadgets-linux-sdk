@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.8 — 17 October 2026
+
+- Protocol 0.1.0 is re-pinned from gateway 0.1.0-alpha.16, with its optional signed-update frames and `fixtures/update-transcript.json` ([#89](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/89)). The Linux agent does not take updates and sends no update fields; its wire behaviour is unchanged.
+- The `gateway` extra pins `grok-gadgets-gateway==0.1.0a16` from PyPI ([#87](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/87)).
+
 ## 0.1.0-alpha.7 — 17 October 2026
 
 - Protocol files re-pinned to gateway `dev` with the optional claim fields of hub ADR 011 ([#82](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/82)). The agent does not send `claim`, so its frames and replies are unchanged.
