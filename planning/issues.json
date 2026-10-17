@@ -633,7 +633,7 @@
       "linux",
       "P1"
     ],
-    "stage": "review",
-    "evidence": "GitHub #76; tests/test_remote.py (fake TLS gateway and the real gateway relay listener). Not yet on a real relay."
+    "stage": "done",
+    "evidence": "GitHub #76; tests/test_remote.py (fake TLS gateway and the real gateway relay listener). Not yet on a real relay. Released in 0.1.0a9. Phase 12a dry run on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): two batch gadgets Online on a fresh relay over TLS."
   }
 ]
