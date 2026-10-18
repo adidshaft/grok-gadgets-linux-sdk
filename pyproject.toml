@@ -1,6 +1,6 @@
 [project]
 name = "grok-gadgets-linux-sdk"
-version = "0.1.0a9"
+version = "0.1.0a10"
 description = "Capability SDK and loopback agent for Grok Gadgets"
 requires-python = ">=3.11"
 license = "Apache-2.0"
@@ -22,7 +22,7 @@ dependencies = ["jsonschema==4.26.0"]
 
 [project.optional-dependencies]
 # `grok-linux-agent dev` runs the gateway in-process. The gateway never depends on this SDK.
-gateway = ["grok-gadgets-gateway==0.1.0a17"]
+gateway = ["grok-gadgets-gateway==0.1.0a18"]
 
 [project.urls]
 Homepage = "https://grokgadgets.org/"
