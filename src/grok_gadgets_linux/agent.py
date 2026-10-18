@@ -52,6 +52,7 @@ class Agent:
         backoff_cap=5.0,
         request_timeout=2.0,
         handler_timeout=5.0,
+        wait_ms=None,
     ):
         # Loopback is plain TCP. Any other host is a relay: TLS with the relay's CA as the only
         # trust anchor and the name checked, as an ESP32 Wi-Fi gadget does (hub ADR 005, 013).
@@ -78,6 +79,11 @@ class Agent:
             raise ValueError("Backoff must be positive and capped at 60 seconds")
         if not 0 < request_timeout <= 10 or not 0 < handler_timeout <= 10:
             raise ValueError("Timeouts must be positive and at most 10 seconds")
+        # Long-poll (hub ADR 014): the relay holds each poll up to wait_ms for a command.
+        if wait_ms is not None and (type(wait_ms) is not int or not 100 <= wait_ms <= 10000):
+            raise ValueError("wait_ms must be 100..10000 milliseconds")
+        self.wait_ms = wait_ms
+        self._wait_refused = False  # An older relay refused the field; until restart.
         # `token` may be a callable (for example a --token-file reader), read on each connect.
         device.hello(token() if callable(token) else token)  # Validate before connecting.
         self.device, self.token = device, token
@@ -101,7 +107,8 @@ class Agent:
         hello = message.get("type") == "hello"
         writer.write(validate_request(message, MAX_HELLO_FRAME if hello else MAX_FRAME))
         await asyncio.wait_for(writer.drain(), self.request_timeout)
-        line = await asyncio.wait_for(reader.readline(), self.request_timeout)
+        wait = message.get("wait_ms", 0) / 1000 if message.get("type") == "poll" else 0
+        line = await asyncio.wait_for(reader.readline(), self.request_timeout + wait)
         if not line or not line.endswith(b"\n") or len(line) > MAX_FRAME:
             raise SDKError("connection_lost")
         try:
@@ -160,7 +167,16 @@ class Agent:
                     await self.exchange(reader, writer, event)
                     self.device.events.popleft()  # Lost response retains same event ID for retry.
                 await self.exchange(reader, writer, {"type": "state", "state": self.device.state})
-                response = await self.exchange(reader, writer, {"type": "poll"})
+                waiting = self.wait_ms is not None and not self._wait_refused
+                poll = {"type": "poll", "wait_ms": self.wait_ms} if waiting else {"type": "poll"}
+                try:
+                    response = await self.exchange(reader, writer, poll)
+                except SDKError as error:
+                    if not waiting or error.code != "invalid_request":
+                        raise
+                    # A relay from before long-poll keeps the session: poll without the field.
+                    self._wait_refused = True
+                    continue
                 commands = response.get("commands")
                 if not isinstance(commands, list) or len(commands) > 1:
                     raise SDKError("invalid_response")
@@ -178,6 +194,8 @@ class Agent:
                         if error.code not in ACK_NON_FATAL:
                             raise
                         self.dropped_acks += 1
+                if waiting:
+                    continue  # The relay paced this poll; the next one goes at once.
                 try:
                     await asyncio.wait_for(stop.wait(), self.poll_interval)
                 except TimeoutError:

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Long-poll, opt-in ([gateway #182](https://github.com/adidshaft/grok-gadgets-gateway/issues/182), hub ADR 014). `grok-linux-agent --wait-ms N` or `Agent(wait_ms=N)` (100..10000) adds `wait_ms` to each poll; the relay answers when a command is ready or the wait ends, and the agent polls again at once. An older relay refuses the field once: the agent keeps its session and polls without it until restart. Protocol re-pinned at gateway `70fbd43`.
+
 ## 0.1.0-alpha.9 — 18 October 2026
 
 - On 17 October 2026 two Linux gadgets from a batch (`enroll --count 2`) connected to a fresh relay over TLS with `--gateway`, `--ca`, `--device-id` and their token files, and showed Online in the relay's `builder report` ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/builder-kit-2026-10-17.md)). Simulated devices; a Linux gadget has no claim code, so the operator assigns it to an account.

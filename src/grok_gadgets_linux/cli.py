@@ -298,6 +298,12 @@ def main(argv=None):
         action="store_true",
         help="Explicitly inject press/release into the simulated example",
     )
+    parser.add_argument(
+        "--wait-ms",
+        type=int,
+        help="long-poll: the relay holds each poll up to this many ms for a command "
+        "(100..10000; relays from gateway 0.1.0a18)",
+    )
     retries = parser.add_mutually_exclusive_group()
     retries.add_argument(
         "--max-attempts",
@@ -334,6 +340,7 @@ def main(argv=None):
                 **remote,
                 reconnect_attempts=None if args.retry_forever else args.max_attempts,
                 backoff_cap=30.0 if args.retry_forever else 5.0,
+                wait_ms=args.wait_ms,
             )
         except ValueError:
             raise SDKError("invalid_option") from None
