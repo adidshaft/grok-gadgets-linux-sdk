@@ -218,7 +218,7 @@ wheels = [
 
 [[package]]
 name = "grok-gadgets-gateway"
-version = "0.1.0a17"
+version = "0.1.0a18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -228,14 +228,14 @@ dependencies = [
     { name = "pyserial" },
     { name = "segno" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/b6/e711ab410e414450c1806e29348c05f143d6f15e65cb63135c2c398cc96f/grok_gadgets_gateway-0.1.0a17.tar.gz", hash = "sha256:7b4445f6338687328970351085930887c0daa64cbcd09a885db1a4f28a765aba", size = 331955, upload-time = "2026-10-17T21:37:52.261Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/e8/0eb01ae9972c7e19e73da97896b616b93f47f1bb1c0d79fdea851ed59183/grok_gadgets_gateway-0.1.0a18.tar.gz", hash = "sha256:a4488cf175e473def06cd2cdd0ef5231e0b34e66dcceee0c35d02c8ead3e7d5a", size = 365573, upload-time = "2026-10-18T13:37:02.438Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/cf/75f6d4461d32b0371527c8d7128ef275832250b7eaab2bf55a2828660808/grok_gadgets_gateway-0.1.0a17-py3-none-any.whl", hash = "sha256:44763e1041f13f539f95817c026f4d7909257a44d9a4570bc906d86a3cf5bf43", size = 142700, upload-time = "2026-10-17T21:37:51.01Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/9b/8370dae30600e7668f2762c47505494760da7c8e44bf1f5c1c332486f936/grok_gadgets_gateway-0.1.0a18-py3-none-any.whl", hash = "sha256:a2bfc2bea740a2a294ad01a7cc9a23d86df98d8ef3fc85137057c494c129be02", size = 162344, upload-time = "2026-10-18T13:37:00.878Z" },
 ]
 
 [[package]]
 name = "grok-gadgets-linux-sdk"
-version = "0.1.0a9"
+version = "0.1.0a10"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
@@ -253,7 +253,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", specifier = "==0.1.0a17" },
+    { name = "grok-gadgets-gateway", marker = "extra == 'gateway'", specifier = "==0.1.0a18" },
     { name = "jsonschema", specifier = "==4.26.0" },
 ]
 provides-extras = ["gateway"]
