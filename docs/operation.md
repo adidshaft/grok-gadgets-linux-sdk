@@ -95,6 +95,9 @@ grok-linux-agent --factory-file ./my_gadget.py --device-id lamp-01 \
 
 - The port is 8444 unless you add one: `--gateway devices.example.net:8443` for an older relay.
 - The agent polls every 500 ms on a relay, and every 100 ms on loopback.
+- `--wait-ms 2500` asks the relay to hold each poll up to 2.5 s for a command (long-poll,
+  hub ADR 014). Commands still arrive at once, and the relay does much less work. Relays from
+  gateway 0.1.0a18 support it; an older relay refuses it once and the agent polls as before.
 - A certificate from another CA, or for another name, stops the agent with `tls_rejected`
   (exit code 2). Check the files with `grok-gadgets-gateway relay-check NAME --ca FILE`.
 - `--device-id` sets the enrolled ID, for example `lamp-01`. It replaces the ID in your

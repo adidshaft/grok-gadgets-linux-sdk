@@ -240,7 +240,7 @@ class DeviceTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("TOKEN", json.dumps(ack))
 
     def test_pinned_fixtures_validate_and_match_hashes(self):
-        self.assertEqual(SOURCE["source_commit"], "f55acd8d9e854b17df5fc4b096f6afac7350c229")
+        self.assertEqual(SOURCE["source_commit"], "70fbd43f0ef99b44e292d0ac0b0bcfa6a14a79d5")
         gateway = os.environ.get("GROK_GATEWAY_SOURCE")
         if gateway:
             # CI runs against gateway main: a protocol change there must be re-pinned here.

@@ -1,11 +1,11 @@
 {
   "version": "0.1.0",
   "source_repository": "grok-gadgets-gateway",
-  "source_commit": "f55acd8d9e854b17df5fc4b096f6afac7350c229",
+  "source_commit": "70fbd43f0ef99b44e292d0ac0b0bcfa6a14a79d5",
   "source_path": "protocol/0.1.0",
   "files": {
-    "README.md": "0d39330ef6829b22d36bfaa52f442054b78f734a519ac7f8ded7c0a047ed6645",
-    "device-request.schema.json": "cb89a0609516ec2d45b7db8d7870331375d6e0814f9810ecfa22e8e4f1ebd405",
+    "README.md": "03c603f2a78217b7bb28b1812e48d2501490ff4e7add06f85d53020b4f24302f",
+    "device-request.schema.json": "74200090a5915018a1c8d91ebe08fd1a51b0e8fd06d3d7c3ad6f506b8736c500",
     "device-response.schema.json": "61b718a41b74c728f2b4ee514efe147899c8f4dd832ead0a6a3194f6cc187c95",
     "fixtures/device-transcript.json": "8f2ca255aa434f6be1c5fc85139625a062857229ae3b234c5ab9c1d3a783d1ff",
     "fixtures/update-transcript.json": "b8ee99be9b39fccc3fb0dbfa3bd0690c3026195c57a994d8491d316c0fc1b5f5"
