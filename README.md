@@ -146,7 +146,7 @@ Gadget files run trusted local code; never run code from a conversation.
 ## Community
 
 Show your gadget, ask questions and share ideas on
-[r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/). Report bugs in
+[Grok Gadgets community on X](https://x.com/i/communities/2026191471578067281). Report bugs in
 [GitHub Issues](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues). New here? Pick a
 [good first issue](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 and read [CONTRIBUTING](CONTRIBUTING.md). Help: [SUPPORT](SUPPORT.md). Security:
