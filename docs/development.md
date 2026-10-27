@@ -204,6 +204,21 @@ the whole pattern: a reading every 2 seconds, `climate` in the state, a `thresho
 event and a `threshold.set` command. Run it with
 `grok-linux-agent --factory grok_gadgets_linux.examples:climate_sensor`.
 
+### A real AHT20 on a Raspberry Pi
+
+`grok_gadgets_linux.examples:aht20_climate_sensor` is the same gadget with a real AHT20 module
+on I2C. It uses only the kernel's `/dev/i2c-N` interface, so it needs no extra package.
+
+1. Turn on I2C (`sudo raspi-config`, Interface Options, I2C) and add your user to the `i2c` group.
+2. Wire the module: VCC to pin 1 (3.3 V), SDA to pin 3, SCL to pin 5, GND to pin 6.
+3. Check that it answers at address `38` with `i2cdetect -y 1` (package `i2c-tools`).
+4. Run `grok-linux-agent --factory grok_gadgets_linux.examples:aht20_climate_sensor`.
+   Set `GROK_AHT20_BUS` for a bus other than 1.
+
+If the module stops answering, the state says `sensor: missing` and has no reading. The next
+good reading brings it back, without a crossing event. This reader is **Not tested on
+hardware** yet; the tests use a scripted bus.
+
 ## Handle retries
 
 The command cache retains 128 results per process and boot. Within that cache:

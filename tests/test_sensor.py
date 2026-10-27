@@ -6,7 +6,7 @@ import unittest
 from fake_gateway import FakeGateway, bounded
 
 from grok_gadgets_linux import Agent, Device, SDKError
-from grok_gadgets_linux.examples import climate_sensor
+from grok_gadgets_linux.examples import aht20_reader, climate_sensor
 
 TOKEN = "fixture-sensor-token-only"
 
@@ -96,6 +96,71 @@ class ClimateSensor(unittest.IsolatedAsyncioTestCase):
             {"command_id": "c2", "capability": "threshold.set", "arguments": {"above_c": 500}}
         )
         self.assertEqual(bad["status"], "failed")
+
+    @bounded()
+    async def test_a_missing_module_drops_the_reading_and_recovers(self):
+        def unplugged():
+            raise OSError("no module")
+
+        script = iter([(20.0, 40.0), unplugged, (27.0, 41.0), (28.0, 41.0), (20.0, 41.0)])
+
+        def read():
+            step = next(script)
+            return step() if callable(step) else step
+
+        sensor = climate_sensor(read=read, interval=0.01)
+        seen = []
+        sensor.publish_state = lambda state: seen.append(dict(state["climate"]))
+        stop = asyncio.Event()
+        producer = asyncio.create_task(sensor._background[0](stop))
+        while len(seen) < 5:
+            await asyncio.sleep(0.005)
+        stop.set()
+        await producer
+        self.assertEqual(seen[1]["sensor"], "missing")
+        self.assertNotIn("temperature_c", seen[1])
+        self.assertEqual(seen[2]["sensor"], "ok")
+        # The first reading after the gap is not a crossing; 28 -> 20 is.
+        self.assertEqual([e["data"]["value"] for e in sensor.events], [20.0])
+
+    def test_aht20_frames(self):
+        sleeps = []
+
+        class Bus:
+            def __init__(self, replies):
+                self.replies, self.writes, self.closed = iter(replies), [], False
+
+            def write(self, data):
+                self.writes.append(bytes(data))
+
+            def read(self, size):
+                reply = next(self.replies)
+                if isinstance(reply, Exception):
+                    raise reply
+                return reply
+
+            def close(self):
+                self.closed = True
+
+        # 40 % and 25 °C, then the busy bit, then a bus error, then a fresh bus.
+        first = Bus(
+            [bytes([0x1C, 0x66, 0x66, 0x66, 0, 0]), bytes([0x9C, 0, 0, 0, 0, 0]), OSError()]
+        )
+        second = Bus([bytes([0x1C, 0x66, 0x66, 0x66, 0, 0])])
+        buses = iter([first, second])
+        read = aht20_reader(1, open_bus=lambda: next(buses), sleep=sleeps.append)
+        temperature, humidity = read()
+        self.assertAlmostEqual(humidity, 40.0, places=1)
+        self.assertAlmostEqual(temperature, 25.0, places=1)
+        self.assertEqual(first.writes[:2], [bytes([0xBE, 0x08, 0x00]), bytes([0xAC, 0x33, 0x00])])
+        self.assertIn(0.08, sleeps)
+        with self.assertRaises(OSError):
+            read()  # Busy.
+        with self.assertRaises(OSError):
+            read()  # The module stopped answering: the bus closes and opens again next time.
+        self.assertTrue(first.closed)
+        self.assertAlmostEqual(read()[0], 25.0, places=1)
+        self.assertEqual(second.writes[0], bytes([0xBE, 0x08, 0x00]))
 
     def test_cadence_is_bounded(self):
         with self.assertRaises(ValueError):

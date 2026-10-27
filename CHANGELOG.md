@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `examples:aht20_climate_sensor` reads a real AHT20 over Linux I2C with the standard library only ([#109](https://github.com/adidshaft/grok-gadgets-linux-sdk/issues/109)). A read that fails reports `sensor: missing` with no stale reading, instead of stopping the producer. Not tested on hardware yet.
+
 ## 0.1.0-alpha.10 — 18 October 2026
 
 - The `gateway` extra pins `grok-gadgets-gateway==0.1.0a18`. Long-poll (below) needs a relay on gateway 0.1.0a18; on 18 October 2026 a fresh 512 MB relay carried 1,000 simulated gadgets with long-poll ([hub record](https://github.com/adidshaft/grok-gadgets/blob/dev/docs/verification/ready-for-others-2026-10-18.md)). Long-poll from a Linux agent on hardware is not tested.
