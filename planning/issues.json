@@ -635,5 +635,22 @@
     ],
     "stage": "done",
     "evidence": "GitHub #76; tests/test_remote.py (fake TLS gateway and the real gateway relay listener). Not yet on a real relay. Released in 0.1.0a9. Phase 12a dry run on 17 October 2026 (hub docs/verification/builder-kit-2026-10-17.md): two batch gadgets Online on a fresh relay over TLS."
+  },
+  {
+    "id": "LIN-COMMUNITY-X-001",
+    "owner": "grok-gadgets-linux-sdk",
+    "problem": "Community links direct people to the former Reddit community",
+    "acceptance": [
+      "README, support policy and issue contact link point to the Grok Gadgets X Community"
+    ],
+    "dependencies": [],
+    "labels": [
+      "documentation",
+      "community"
+    ],
+    "milestone": "Documentation upkeep",
+    "stage": "done",
+    "commits": [],
+    "evidence": "CTA links and Git diff reviewed; Ruff, format check, 69 unit tests (16 skipped), and package build passed."
   }
 ]

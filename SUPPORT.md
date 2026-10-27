@@ -11,7 +11,7 @@ Report defects and focused requests in [GitHub Issues](https://github.com/adidsh
 - Expected and observed results.
 - Minimal logs with private data removed.
 
-Use [r/GrokGadgets](https://www.reddit.com/r/GrokGadgets/) for community discussion. The hub contains the [shared support policy](https://github.com/adidshaft/grok-gadgets/blob/main/SUPPORT.md). No response time is guaranteed.
+Use [Grok Gadgets community on X](https://x.com/i/communities/2026191471578067281) for community discussion. The hub contains the [shared support policy](https://github.com/adidshaft/grok-gadgets/blob/main/SUPPORT.md). No response time is guaranteed.
 
 Do not post credentials, private paths, household state, event contents or account captures.
 
